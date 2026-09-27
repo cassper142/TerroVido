@@ -10,19 +10,21 @@ interface Props {
 const { locale, t } = Astro.props as Props;
 
 const navLinks = [
-  { label: t.nav.products, href: `/${locale}/products/` },
-  { label: t.nav.about, href: `/${locale}/about/` },
-  { label: t.nav.distributors, href: `/${locale}/distributors/` },
-  { label: t.nav.blog, href: `/${locale}/blog/` },
+  { label: t.nav.products, href: localizePath('/products/', locale) },
+  { label: t.nav.about, href: localizePath('/about/', locale) },
+  { label: t.nav.distributors, href: localizePath('/distributors/', locale) },
+  { label: t.nav.blog, href: localizePath('/blog/', locale) },
 ];
 
 const currentPathname = stripLocaleFromPathname(Astro.url.pathname);
+const homeUrl = localizePath('/', locale);
+const contactUrl = localizePath('/contact/', locale);
 ---
 
 <header class="header-root fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out will-change-[background,backdrop-filter,box-shadow,border-color]">
   <div class="container pt-5 pb-5">
     <nav class="flex flex-wrap items-center justify-between gap-4" data-i18n-nav>
-      <a href={`/${locale}/`} class="flex items-center shrink-0" data-animate="fade-in" data-delay="1">
+      <a href={homeUrl} class="flex items-center shrink-0" data-animate="fade-in" data-delay="1">
         <img
           src="/images/mugs2u5h-mmh861d.svg"
           alt="Tero Vido"
@@ -92,7 +94,7 @@ const currentPathname = stripLocaleFromPathname(Astro.url.pathname);
           })}
         </div>
 
-        <a href={`/${locale}/contact/`} class="btn-primary" data-animate="zoom-in">
+        <a href={contactUrl} class="btn-primary" data-animate="zoom-in">
           <img
             src="/images/mugs2u5d-yuzchse.svg"
             alt=""
@@ -143,7 +145,7 @@ const currentPathname = stripLocaleFromPathname(Astro.url.pathname);
           </li>
         ))}
         <li class="pt-2">
-          <a href={`/${locale}/contact/`} class="btn-primary w-full">
+          <a href={contactUrl} class="btn-primary w-full">
             <img
               src="/images/mugs2u5d-yuzchse.svg"
               alt=""

@@ -1,5 +1,6 @@
 ---
 import type { Locale, Dictionary } from '../i18n/utils';
+import { localizePath } from '../i18n/utils';
 import { DISTRIBUTORS } from '../data/distributors';
 
 interface Props {
@@ -27,7 +28,7 @@ const distributorsJson = JSON.stringify(
   })),
 );
 
-const distributorsUrl = `/${locale}/distributors/`;
+const distributorsUrl = localizePath('/distributors/', locale);
 ---
 
 <link

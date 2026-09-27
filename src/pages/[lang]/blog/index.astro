@@ -8,6 +8,7 @@ import {
   defaultLocale,
   getTranslator,
   isLocale,
+  localizePath,
 } from '../../../i18n/utils';
 import { POSTS_SORTED_BY_DATE, POST_CATEGORIES, getCategoryLabel, type PostCategoryKey } from '../../../data/posts';
 
@@ -111,7 +112,7 @@ const hasMorePosts = otherPosts.length > 9;
                 <span>·</span>
                 <span>{featuredPost.readingTimeMinutes} {dict.blogListPage.readingTimeLabel}</span>
               </div>
-              <a href={`/${locale}/blog/${featuredPost.slug}/`} class="btn-primary" data-animate="fade-up">
+              <a href={localizePath(`/blog/${featuredPost.slug}/`, locale)} class="btn-primary" data-animate="fade-up">
                 {dict.blogListPage.readMore}
               </a>
             </div>
@@ -146,7 +147,7 @@ const hasMorePosts = otherPosts.length > 9;
                 data-category={post.category}
                 data-animate="fade-up"
               >
-                <a href={`/${locale}/blog/${post.slug}/`} class="block">
+                <a href={localizePath(`/blog/${post.slug}/`, locale)} class="block">
                   <div class="relative aspect-[4/3] overflow-hidden">
                     <img
                       src={`https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(post.imagePrompt)}&image_size=landscape_4_3`}

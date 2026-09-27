@@ -8,6 +8,7 @@ import {
   defaultLocale,
   getTranslator,
   isLocale,
+  localizePath,
 } from '../../../i18n/utils';
 import { PRODUCTS_BY_SLUG, type ProductSlug } from '../../../data/products';
 
@@ -25,7 +26,7 @@ const t = translator.dict;
 
 const isValidSlug = Object.keys(PRODUCTS_BY_SLUG).includes(slug as string);
 if (!isValidSlug) {
-  return Astro.redirect(`/${locale}/products/`, 302);
+  return Astro.redirect(localizePath('/products/', locale), 302);
 }
 
 const product = PRODUCTS_BY_SLUG[slug as ProductSlug];
@@ -73,7 +74,7 @@ const techSpecsRows: { label: string; value: string }[] = [
       <div class="snap-hero-inner container flex-1 flex items-center pb-20 md:pb-28">
         <div class="flex flex-col gap-4 max-w-[760px] w-full" data-stagger="110">
           <a
-            href={`/${locale}/products/`}
+            href={localizePath('/products/', locale)}
             class="inline-flex items-center gap-2 text-white/80 hover:text-white transition text-base w-fit"
             data-animate="fade-up"
           >
@@ -233,7 +234,7 @@ const techSpecsRows: { label: string; value: string }[] = [
             Get in touch with our team for a personalized quote, live demonstration and expert configuration guidance.
           </p>
           <div class="pt-4" data-animate="fade-up">
-            <a href={`/${locale}/contact/`} class="btn-primary">
+            <a href={localizePath('/contact/', locale)} class="btn-primary">
               <span>{t.productDetailPage.contactForQuote}</span>
               <img
                 src="/images/mugs2u5d-77wz9xw.svg"

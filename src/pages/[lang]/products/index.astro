@@ -8,6 +8,7 @@ import {
   defaultLocale,
   getTranslator,
   isLocale,
+  localizePath,
 } from '../../../i18n/utils';
 import { PRODUCTS } from '../../../data/products';
 
@@ -114,7 +115,7 @@ const sortedProducts = [...PRODUCTS].sort((a, b) => a.order - b.order);
                   </ul>
 
                   <div class="pt-4 mt-auto flex">
-                    <a href={`/${locale}/products/${product.slug}/`} class="btn-ghost">
+                    <a href={localizePath(`/products/${product.slug}/`, locale)} class="btn-ghost">
                       <span>{t.productsListPage.ctaViewDetails}</span>
                       <img
                         src="/images/mugs2u5d-77wz9xw.svg"

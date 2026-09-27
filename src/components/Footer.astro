@@ -1,5 +1,6 @@
 ---
 import type { Locale, Dictionary } from '../i18n/utils';
+import { localizePath } from '../i18n/utils';
 
 interface Props {
   locale: Locale;
@@ -9,18 +10,20 @@ interface Props {
 const { locale, t } = Astro.props as Props;
 
 const navLinks = [
-  { label: t.nav.products, href: `/${locale}/products/` },
-  { label: t.nav.about, href: `/${locale}/about/` },
-  { label: t.nav.distributors, href: `/${locale}/distributors/` },
-  { label: t.nav.blog, href: `/${locale}/blog/` },
+  { label: t.nav.products, href: localizePath('/products/', locale) },
+  { label: t.nav.about, href: localizePath('/about/', locale) },
+  { label: t.nav.distributors, href: localizePath('/distributors/', locale) },
+  { label: t.nav.blog, href: localizePath('/blog/', locale) },
 ];
+
+const homeUrl = localizePath('/', locale);
 ---
 
 <footer id="contact" class="snap-section-footer bg-surface-muted pt-[60px] pb-10 mt-[100px]">
   <div class="container">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 pb-12 border-b border-ink/10" data-stagger="120">
       <div class="flex flex-col gap-3" data-animate="fade-up">
-        <a href={`/${locale}/`} class="inline-flex items-center">
+        <a href={homeUrl} class="inline-flex items-center">
           <img
             src="/images/mugs2u5h-mmh861d.svg"
             alt="Tero Vido"

@@ -8,6 +8,7 @@ import {
   defaultLocale,
   getTranslator,
   isLocale,
+  localizePath,
 } from '../../../i18n/utils';
 
 export const getStaticPaths = (() =>
@@ -302,7 +303,7 @@ const heroBg =
               </div>
 
               <div class="pt-6">
-                <a href={`/${locale}/contact/`} class="btn-primary">
+                <a href={localizePath('/contact/', locale)} class="btn-primary">
                   <img
                     src="/images/mugs2u5d-yuzchse.svg"
                     alt=""

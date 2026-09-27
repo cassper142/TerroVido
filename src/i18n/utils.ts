@@ -10,6 +10,10 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && locales.includes(value as Locale);
 }
 
+export function isDefaultLocale(value: unknown): value is typeof defaultLocale {
+  return value === defaultLocale;
+}
+
 export function getLocaleFromPathname(pathname: string): Locale | undefined {
   const first = pathname.split('/').filter(Boolean)[0];
   return isLocale(first) ? first : undefined;
@@ -24,6 +28,7 @@ export function stripLocaleFromPathname(pathname: string): string {
 export function localizePath(pathname: string, locale: Locale): string {
   const stripped = stripLocaleFromPathname(pathname);
   const clean = stripped === '' ? '/' : stripped;
+  if (locale === defaultLocale) return clean === '/' ? '/' : clean;
   return `/${locale}${clean === '/' ? '/' : clean}`;
 }
 
