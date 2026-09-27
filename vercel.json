@@ -1,1 +1,64 @@
-{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "cookie",
+          "key": "tv-locale",
+          "value": "(?<locale>en|de)"
+        }
+      ],
+      "destination": "/:locale/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^de[^,-]*(?:,|$)"
+        }
+      ],
+      "destination": "/de/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "destination": "/en/",
+      "permanent": false
+    },
+    {
+      "source": "/((?!en|de|_vercel|images|scripts|styles|favicon)[^/.]*)(?:/(.*))?",
+      "has": [
+        {
+          "type": "cookie",
+          "key": "tv-locale",
+          "value": "(?<locale>en|de)"
+        }
+      ],
+      "destination": "/:locale/:match*",
+      "permanent": false
+    },
+    {
+      "source": "/((?!en|de|_vercel|images|scripts|styles|favicon)[^/.]*)(?:/(.*))?",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^de[^,-]*(?:,|$)"
+        }
+      ],
+      "destination": "/de/:match*",
+      "permanent": false
+    },
+    {
+      "source": "/((?!en|de|_vercel|images|scripts|styles|favicon)[^/.]*)(?:/(.*))?",
+      "destination": "/en/:match*",
+      "permanent": false
+    }
+  ]
+}

@@ -31,6 +31,8 @@ const isStatic =
 
 // In static output we render the fallback redirect page (client-side detection)
 const renderedLocale = isStatic ? defaultLocale : target;
+
+const redirectPath = `/${renderedLocale}/`;
 ---
 <!doctype html>
 <html lang={renderedLocale}>
@@ -42,10 +44,10 @@ const renderedLocale = isStatic ? defaultLocale : target;
       <link rel="alternate" hreflang={code} href={`/${code}/`} />
     ))}
     <link rel="alternate" hreflang="x-default" href={`/${defaultLocale}/`} />
-    <meta http-equiv="refresh" content={`0; url=/${renderedLocale}/`} />
+    <meta http-equiv="refresh" content={`0; url=${redirectPath}`} />
   </head>
   <body>
-    <a href={`/${renderedLocale}/`}>Continue</a>
+    <a href={redirectPath}>Continue</a>
     <script is:inline>
       (function () {
         var COOKIE = 'tv-locale';
@@ -77,9 +79,18 @@ const renderedLocale = isStatic ? defaultLocale : target;
         var chosen = pick();
         try { localStorage.setItem(LS_KEY, chosen); } catch(_) { /* noop */ }
         setCookie(chosen);
-        var dest = '/' + chosen + location.pathname.replace(/^\/+/, '').replace(/^(en|de)(\/|$)/, '$2') + location.search + location.hash;
+
+        var raw = location.pathname.replace(/^\/+/, '');
+        var stripped = raw.replace(/^(en|de)(\/|$)/, '$2');
+        var dest = '/' + chosen + (stripped ? '/' + stripped.replace(/^\/+/, '') : '/');
         if (!/^\/(en|de)([\/#?]|$)/.test(dest)) dest = '/' + chosen + '/';
-        location.replace(dest);
+        var final = dest + location.search + location.hash;
+
+        try {
+          location.replace(final);
+        } catch (e) {
+          location.href = final;
+        }
       })();
     </script>
   </body>
