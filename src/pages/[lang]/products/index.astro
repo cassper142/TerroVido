@@ -1,0 +1,141 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+import { PRODUCTS } from '../../../data/products';
+
+export const getStaticPaths = (() =>
+  locales.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const translator = getTranslator(locale);
+const t = translator.dict;
+
+const pageTitle = t.productsListPage.title;
+const pageDescription = t.productsListPage.subtitle;
+const heroBg =
+  'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=professional%203D%20ground%20radar%20scanner%20with%20tablet%20golden%20sunset%20forest%20germany%20terovido&image_size=landscape_16_9';
+
+const sortedProducts = [...PRODUCTS].sort((a, b) => a.order - b.order);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle} — Tero Vido</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <section
+      class="snap-section-hero snap-section hero-dark relative overflow-hidden bg-cover bg-center bg-no-repeat min-h-[70vh] flex flex-col"
+      style={`background-image: url('${heroBg}');`}
+      id="hero"
+    >
+      <Header locale={locale} t={t} />
+
+      <div class="snap-hero-inner container flex-1 flex items-center pb-20 md:pb-28">
+        <div class="flex flex-col gap-4 max-w-[687px] w-full" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{t.productsListPage.label}</span>
+          </div>
+
+          <h1 class="section-title" data-animate="fade-up">
+            {t.productsListPage.title}
+          </h1>
+
+          <p class="section-text max-w-[600px]" data-animate="fade-up">
+            {t.productsListPage.subtitle}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch" data-stagger="130">
+          {sortedProducts.map((product) => {
+            const cardImg = `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(product.heroPrompt)}&image_size=landscape_4_3`;
+            const features = product.features[locale].slice(0, 3);
+            return (
+              <article
+                class="flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:-translate-y-1 shadow-card transition-all duration-300"
+                data-animate="fade-up"
+              >
+                <div class="overflow-hidden">
+                  <img
+                    src={cardImg}
+                    alt={product.titles[locale]}
+                    class="w-full h-[240px] object-cover transition-transform duration-[1200ms] hover:scale-[1.04]"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="flex flex-col gap-4 p-6 flex-1">
+                  <div class="flex flex-col gap-2">
+                    <div class="section-label" data-animate="fade-up">
+                      <span>{product.label}</span>
+                    </div>
+                    <h3 class="font-bold text-gold text-2xl leading-tight md:text-[28px]">
+                      {product.titles[locale]}
+                    </h3>
+                    <p class="section-text">
+                      {product.shortDescriptions[locale]}
+                    </p>
+                  </div>
+
+                  <ul class="flex flex-col gap-2 pt-2" data-stagger="90">
+                    {features.map((f) => (
+                      <li class="flex items-start gap-2.5" data-animate="fade-up">
+                        <img
+                          src="/images/mugs2u5d-k2w37u1.svg"
+                          alt=""
+                          class="w-5 h-5 shrink-0 mt-0.5"
+                          width="20"
+                          height="20"
+                        />
+                        <span class="text-sm text-ink-gray leading-relaxed">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div class="pt-4 mt-auto flex">
+                    <a href={`/${locale}/products/${product.slug}/`} class="btn-ghost">
+                      <span>{t.productsListPage.ctaViewDetails}</span>
+                      <img
+                        src="/images/mugs2u5d-77wz9xw.svg"
+                        alt=""
+                        class="w-[18px] h-3 shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+                        width="18"
+                        height="12"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <Footer locale={locale} t={t} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+  </body>
+</html>

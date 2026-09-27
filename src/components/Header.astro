@@ -1,0 +1,188 @@
+---
+import type { Locale, Dictionary } from '../i18n/utils';
+import { locales, localeLabels, localizePath, stripLocaleFromPathname } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { locale, t } = Astro.props as Props;
+
+const navLinks = [
+  { label: t.nav.products, href: `/${locale}/products/` },
+  { label: t.nav.about, href: `/${locale}/about/` },
+  { label: t.nav.distributors, href: `/${locale}/distributors/` },
+  { label: t.nav.blog, href: `/${locale}/blog/` },
+];
+
+const currentPathname = stripLocaleFromPathname(Astro.url.pathname);
+---
+
+<header class="header-root fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out will-change-[background,backdrop-filter,box-shadow,border-color]">
+  <div class="container pt-5 pb-5">
+    <nav class="flex flex-wrap items-center justify-between gap-4" data-i18n-nav>
+      <a href={`/${locale}/`} class="flex items-center shrink-0" data-animate="fade-in" data-delay="1">
+        <img
+          src="/images/mugs2u5h-mmh861d.svg"
+          alt="Tero Vido"
+          class="w-[120px] h-[68px] object-contain float-slow"
+          width="120"
+          height="68"
+        />
+      </a>
+
+      <ul class="hidden lg:flex items-center gap-11" data-stagger="90">
+        {navLinks.map((link) => (
+          <li data-animate="fade-down">
+            <a
+              href={link.href}
+              class="text-base text-ink hover:text-gold transition"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="hidden xl:flex items-center gap-[18px]" data-stagger="80">
+        <div class="social-group flex items-center gap-3" data-animate="fade-in">
+          <img
+            src="/images/mugs2u5d-r7kzdcm.svg"
+            alt="Facebook"
+            class="w-6 h-6 transition-transform duration-300 hover:-translate-y-0.5"
+            width="24"
+            height="24"
+          />
+          <img
+            src="/images/mugs2u5d-2j0ziew.svg"
+            alt="YouTube"
+            class="w-7 h-5 transition-transform duration-300 hover:-translate-y-0.5"
+            width="28"
+            height="20"
+          />
+          <img
+            src="/images/mugs2u5d-dmy0l9t.svg"
+            alt="Instagram"
+            class="w-6 h-6 transition-transform duration-300 hover:-translate-y-0.5"
+            width="24"
+            height="24"
+          />
+        </div>
+
+        <div class="inline-flex items-center gap-1.5 rounded-full border border-[#AFAFAF] p-1 text-base text-ink transition hover:border-gold"
+          role="group"
+          aria-label="Language switcher"
+          data-animate="zoom-in"
+        >
+          {locales.map((code) => {
+            const active = code === locale;
+            return (
+              <a
+                href={localizePath(currentPathname, code)}
+                class={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 ${
+                  active ? 'bg-gold text-white shadow-[0_6px_18px_rgba(216,181,105,0.35)]' : 'text-ink hover:text-gold'
+                }`}
+                aria-current={active ? 'true' : undefined}
+                hreflang={code}
+              >
+                {localeLabels[code]}
+              </a>
+            );
+          })}
+        </div>
+
+        <a href={`/${locale}/contact/`} class="btn-primary" data-animate="zoom-in">
+          <img
+            src="/images/mugs2u5d-yuzchse.svg"
+            alt=""
+            class="w-6 h-6"
+            width="24"
+            height="24"
+          />
+          <span>{t.nav.contact}</span>
+        </a>
+      </div>
+
+      <button
+        id="menuToggle"
+        class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full border border-ink/10"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <svg
+          width="20"
+          height="14"
+          viewBox="0 0 20 14"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M1 1H19M1 7H19M1 13H19"
+            stroke="#000"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </nav>
+
+    <div
+      id="mobileMenu"
+      class="hidden lg:hidden mt-4 rounded-2xl bg-white shadow-card p-6"
+    >
+      <ul class="flex flex-col gap-4">
+        {navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="text-base text-ink hover:text-gold transition"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+        <li class="pt-2">
+          <a href={`/${locale}/contact/`} class="btn-primary w-full">
+            <img
+              src="/images/mugs2u5d-yuzchse.svg"
+              alt=""
+              class="w-6 h-6"
+              width="24"
+              height="24"
+            />
+            <span>{t.nav.contact}</span>
+          </a>
+        </li>
+        <li class="pt-3 border-t border-ink/10">
+          <div class="inline-flex items-center gap-1.5 rounded-full border border-[#AFAFAF] p-1 text-base text-ink">
+            {locales.map((code) => {
+              const active = code === locale;
+              return (
+                <a
+                  href={localizePath(currentPathname, code)}
+                  class={`px-3 py-1 rounded-full text-sm font-medium transition ${
+                    active ? 'bg-gold text-white' : 'text-ink hover:text-gold'
+                  }`}
+                >
+                  {localeLabels[code]}
+                </a>
+              );
+            })}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('menuToggle');
+  const menu = document.getElementById('mobileMenu');
+  if (toggle && menu) {
+    toggle.addEventListener('click', () => {
+      const isHidden = menu.classList.toggle('hidden');
+      toggle.setAttribute('aria-expanded', String(!isHidden));
+    });
+  }
+</script>

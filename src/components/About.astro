@@ -1,0 +1,54 @@
+---
+import type { Locale, Dictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { t } = Astro.props as Props;
+---
+
+<section id="about" class="snap-section py-[100px] bg-surface">
+  <div class="container">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[69px] items-center">
+      <div class="order-2 lg:order-1 overflow-hidden rounded-[10px]" data-animate="fade-left">
+        <img
+          src="/images/mugs2u5h-ha3a3rx.svg"
+          alt="Tero Vido team at work"
+          class="w-full max-w-[525px] mx-auto lg:mx-0 h-[340px] md:h-[405px] object-cover transition-transform duration-[1200ms] hover:scale-[1.04]"
+          loading="lazy"
+          width="525"
+          height="405"
+        />
+      </div>
+
+      <div class="order-1 lg:order-2 flex flex-col gap-4" data-stagger="110">
+        <div class="section-label" data-animate="fade-up">
+          <span>{t.about.label}</span>
+        </div>
+
+        <h2 class="section-title max-w-[539px]" data-animate="fade-up">
+          {t.about.title}
+        </h2>
+
+        <p class="section-text max-w-[539px]" data-animate="fade-up">
+          {t.about.text}
+        </p>
+
+        <div class="pt-2" data-animate="zoom-in">
+          <a href="#" class="btn-ghost group">
+            <span>{t.nav.discoverHistory}</span>
+            <img
+              src="/images/mugs2u5d-k2w37u1.svg"
+              alt=""
+              class="w-[18px] h-3 shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+              width="18"
+              height="12"
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

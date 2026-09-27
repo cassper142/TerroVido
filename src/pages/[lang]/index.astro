@@ -1,0 +1,43 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Layout from '../../layouts/Layout.astro';
+import Hero from '../../components/Hero.astro';
+import Products from '../../components/Products.astro';
+import WhyTeroVido from '../../components/WhyTeroVido.astro';
+import About from '../../components/About.astro';
+import GlobalNetwork from '../../components/GlobalNetwork.astro';
+import Blog from '../../components/Blog.astro';
+import Footer from '../../components/Footer.astro';
+import SnapNav from '../../components/SnapNav.astro';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../i18n/utils';
+
+export const getStaticPaths = (() =>
+  locales.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = getTranslator(locale);
+const dict = t.dict;
+
+const isDefault = locale === defaultLocale;
+---
+
+<Layout title={dict.meta.title} description={dict.meta.description}>
+  <main>
+    <Hero locale={locale} t={dict} />
+    <Products locale={locale} t={dict} />
+    <WhyTeroVido locale={locale} t={dict} />
+    <About locale={locale} t={dict} />
+    <GlobalNetwork locale={locale} t={dict} />
+    <Blog locale={locale} t={dict} />
+  </main>
+  <Footer locale={locale} t={dict} />
+  <SnapNav locale={locale} t={dict} />
+  <script src="../../scripts/snap-nav.js"></script>
+  <div data-i18n-locale={locale} data-is-default={String(isDefault)} hidden></div>
+</Layout>

@@ -1,0 +1,592 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+import { DISTRIBUTORS, type RegionKey } from '../../../data/distributors';
+
+export const getStaticPaths = (() =>
+  locales.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = getTranslator(locale);
+const dict = t.dict;
+
+const regions: Array<'ALL' | RegionKey> = ['ALL', 'EUROPE', 'ASIA_PACIFIC', 'AMERICAS', 'MIDDLE_EAST_AFRICA'];
+const REGION_LABELS_LOCAL: Record<RegionKey, Record<typeof locale, string>> = {
+  EUROPE: { en: 'Europe', de: 'Europa' },
+  ASIA_PACIFIC: { en: 'Asia-Pacific', de: 'Asien-Pazifik' },
+  AMERICAS: { en: 'Americas', de: 'Amerika' },
+  MIDDLE_EAST_AFRICA: { en: 'Middle East & Africa', de: 'Naher Osten & Afrika' },
+};
+const regionLabels: Record<'ALL' | RegionKey, Record<typeof locale, string>> = {
+  ALL: { en: 'All', de: 'Alle' },
+  ...REGION_LABELS_LOCAL,
+};
+
+const heroPrompt = 'world%20map%20globe%20golden%20hologram%20dark%20background%20distribution%20network%20glowing%20dots%203D';
+const heroImage = `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${heroPrompt}&image_size=landscape_16_9`;
+
+const metaTitle = `${dict.nav.distributorsPage} — Tero Vido`;
+const metaDescription = dict.distributorsPage.subtitle;
+
+const distributorsJson = JSON.stringify(
+  DISTRIBUTORS.map((d) => ({
+    id: d.id,
+    companyName: d.companyName,
+    countryName: d.countryName[locale],
+    city: d.city[locale],
+    address: d.address,
+    phones: d.phones,
+    emails: d.emails,
+    websites: d.websites,
+    lat: d.lat,
+    lng: d.lng,
+    region: d.region,
+    isHq: !!d.isHq,
+    hqLabel: d.hqLabel?.[locale],
+  })),
+);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style is:global>
+      .leaflet-container {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: #F2F2F2;
+      }
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(85, 85, 85, 0.12);
+        padding: 4px;
+      }
+      .leaflet-popup-content {
+        margin: 16px 18px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .leaflet-popup-tip {
+        box-shadow: none;
+      }
+      .leaflet-control-attribution {
+        background: rgba(255,255,255,0.7) !important;
+        backdrop-filter: blur(4px);
+        font-size: 11px !important;
+        padding: 2px 8px !important;
+        border-radius: 4px 0 0 0;
+      }
+      .leaflet-control-zoom a {
+        border-radius: 8px !important;
+        color: #555555 !important;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+      }
+      .leaflet-control-zoom a:hover {
+        background: #D8B569 !important;
+        color: white !important;
+      }
+      .leaflet-div-icon {
+        background: transparent;
+        border: none;
+      }
+      .tv-marker {
+        position: relative;
+        transform-origin: bottom center;
+        transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease;
+        filter: drop-shadow(0 5px 10px rgba(85, 85, 85, 0.25));
+      }
+      .tv-marker:hover,
+      .tv-marker.is-active {
+        transform: translateY(-3px) scale(1.08);
+        filter: drop-shadow(0 9px 16px rgba(216, 181, 105, 0.45));
+      }
+      .tv-marker.is-hq .tv-pin-pulse {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        width: 18px;
+        height: 18px;
+        margin-left: -9px;
+        border-radius: 9999px;
+        background: rgba(216, 181, 105, 0.55);
+        pointer-events: none;
+        animation: tvPinPulse 2.4s ease-out infinite;
+      }
+      @keyframes tvPinPulse {
+        0%   { transform: scale(0.6); opacity: 0.7; }
+        80%  { transform: scale(2.6); opacity: 0; }
+        100% { transform: scale(2.6); opacity: 0; }
+      }
+      [data-distributor-card].is-active {
+        outline: 2px solid #D8B569;
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <Header locale={locale} t={dict} />
+
+    <main>
+      <section class="snap-section snap-section-hero hero-dark py-[90px] relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+          <img
+            src={heroImage}
+            alt=""
+            class="w-full h-full object-cover"
+            width="1920"
+            height="1080"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        </div>
+        <div class="container relative z-10 snap-hero-inner min-h-[80vh] flex items-center">
+          <div class="max-w-3xl text-white" data-stagger="120">
+            <div class="section-label mb-6" data-animate="fade-up">
+              <span class="text-white/80">{dict.distributorsPage.label}</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-[1.04]" data-animate="fade-up">
+              {dict.distributorsPage.title}
+            </h1>
+            <p class="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl" data-animate="fade-up">
+              {dict.distributorsPage.subtitle}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="snap-section py-[90px]">
+        <div class="container">
+          <div class="text-center max-w-3xl mx-auto mb-16" data-stagger="120">
+            <div class="section-label justify-center mb-6 mx-auto" data-animate="fade-up">
+              <span>{dict.distributorsPage.label}</span>
+            </div>
+            <h2 class="section-title mb-6" data-animate="fade-up">{dict.distributorsPage.mapLabel}</h2>
+            <p class="section-text text-lg" data-animate="fade-up">{dict.distributorsPage.introText}</p>
+          </div>
+
+          <div data-animate="fade-up">
+            <div
+              id="distributors-map"
+              class="w-full rounded-2xl overflow-hidden shadow-sm border border-ink/5 bg-surface-muted"
+              style="height: 520px;"
+            ></div>
+          </div>
+
+          <div role="region" class="flex flex-wrap gap-3 items-center justify-between mt-8">
+            <div class="flex flex-wrap gap-2" data-animate="fade-up">
+              {regions.map((region, i) => (
+                <button
+                  type="button"
+                  data-filter-region={region}
+                  class={`px-4 py-2 rounded-full border border-ink/20 text-sm font-medium transition-all duration-200 hover:border-gold hover:text-gold ${
+                    i === 0 ? 'bg-gold text-white border-gold' : 'text-ink bg-transparent'
+                  }`}
+                >
+                  {regionLabels[region][locale]}
+                </button>
+              ))}
+            </div>
+            <div data-animate="fade-up" data-delay="2">
+              <input
+                type="text"
+                placeholder={dict.distributorsPage.searchPlaceholder}
+                data-search
+                class="px-4 py-2.5 rounded-full border border-ink/20 bg-surface focus:outline-none focus:border-gold text-sm w-64 md:w-80"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="snap-section py-[90px]">
+        <div class="container">
+          <div class="text-center max-w-3xl mx-auto mb-16" data-stagger="120">
+            <div class="section-label justify-center mb-6 mx-auto" data-animate="fade-up">
+              <span>{dict.distributorsPage.label}</span>
+            </div>
+            <h2 class="section-title mb-6" data-animate="fade-up">{dict.distributorsPage.listLabel}</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-stagger="120" id="distributors-list">
+            {DISTRIBUTORS.map((distributor) => (
+              <article
+                class="bg-surface rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300"
+                data-distributor-card
+                data-distributor-id={distributor.id}
+                data-region={distributor.region}
+                data-animate="fade-up"
+              >
+                <div class="flex items-start justify-between mb-4">
+                  <div>
+                    {distributor.isHq && distributor.hqLabel && (
+                      <span class="inline-block bg-gold text-white rounded-full text-xs px-2.5 py-1 mb-3">
+                        {distributor.hqLabel[locale]}
+                      </span>
+                    )}
+                    {!distributor.isHq && distributor.hqLabel && (
+                      <span class="inline-block bg-surface-muted border border-gold/30 text-gold rounded-full text-xs px-2.5 py-1 mb-3">
+                        {distributor.hqLabel[locale]}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <h3 class="font-bold text-gold text-2xl mb-2">{distributor.companyName}</h3>
+                <p class="text-ink-gray text-sm mb-4">
+                  {distributor.countryName[locale]}, {distributor.city[locale]}
+                </p>
+
+                <div class="space-y-3 mb-6">
+                  <p class="section-text text-sm">
+                    <span class="font-semibold text-ink">{dict.distributorsPage.companyLabel}:</span>{' '}
+                    {distributor.address}
+                  </p>
+
+                  {distributor.phones.length > 0 && (
+                    <div>
+                      <span class="font-semibold text-ink text-sm block mb-1">{dict.distributorsPage.contactLabel}:</span>
+                      <ul class="space-y-1">
+                        {distributor.phones.map((phone) => (
+                          <li class="text-sm">
+                            <a href={`tel:${phone.replace(/\s/g, '')}`} class="text-ink-gray hover:text-gold transition">
+                              {phone}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {distributor.emails.length > 0 && (
+                    <ul class="space-y-1">
+                      {distributor.emails.map((email) => (
+                        <li class="text-sm">
+                          <a href={`mailto:${email}`} class="text-ink-gray hover:text-gold transition">
+                            {email}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div class="flex flex-wrap gap-3 pt-4 border-t border-ink/10">
+                  {distributor.websites.length > 0 && (
+                    <a
+                      href={distributor.websites[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="btn-ghost"
+                    >
+                      {dict.distributorsPage.visitWebsite}
+                    </a>
+                  )}
+                  {distributor.emails.length > 0 && (
+                    <a
+                      href={`mailto:${distributor.emails[0]}`}
+                      class="btn-outline"
+                    >
+                      Email
+                    </a>
+                  )}
+                  {distributor.phones.length > 0 && (
+                    <a
+                      href={`tel:${distributor.phones[0].replace(/\s/g, '')}`}
+                      class="btn-outline"
+                    >
+                      Call
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div id="no-results" class="hidden text-center py-16">
+            <p class="section-text text-lg">{dict.distributorsPage.noResults}</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer locale={locale} t={dict} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+    <script
+      is:inline
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script is:inline define:vars={{ distributorsJson, locale }}>
+      (function () {
+        const distributors = JSON.parse(distributorsJson);
+        const filterButtons = document.querySelectorAll('[data-filter-region]');
+        const searchInput = document.querySelector('[data-search]');
+        const cards = document.querySelectorAll('[data-distributor-card]');
+        const noResults = document.getElementById('no-results');
+        const listSection = document.getElementById('distributors-list');
+
+        let currentRegion = 'ALL';
+        let currentSearch = '';
+        const markersById = new Map();
+        let activeCardId = null;
+
+        function buildIcon(isHq) {
+          const W = isHq ? 40 : 32;
+          const H = isHq ? 50 : 40;
+          const PIN_STROKE = '#ffffff';
+          const STROKE_W = 2.5;
+          const body = isHq
+            ? '<path d="M20 1 C9.5 1 1 9 1 19.5 C1 30 20 49 20 49 C20 49 39 30 39 19.5 C39 9 30.5 1 20 1 Z" fill="#555555" stroke="' + PIN_STROKE + '" stroke-width="' + STROKE_W + '"/>'
+            : '<path d="M16 1 C7.2 1 0 7.7 0 16.5 C0 25 16 39 16 39 C16 39 32 25 32 16.5 C32 7.7 24.8 1 16 1 Z" fill="#D8B569" stroke="' + PIN_STROKE + '" stroke-width="' + STROKE_W + '"/>';
+          const innerDot = isHq
+            ? '<circle cx="20" cy="19" r="7" fill="#D8B569"/>'
+            : '<circle cx="16" cy="16" r="5.5" fill="#ffffff"/>';
+          const crown = isHq
+            ? '<path d="M12 14 L15 9 L18 13 L20 8 L22 13 L25 9 L28 14 L28 17.5 L12 17.5 Z" fill="#D8B569" stroke="#ffffff" stroke-width="1"/>'
+            : '';
+          const pulseLayer = isHq ? '<span class="tv-pin-pulse"></span>' : '';
+          const svg =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="display:block;">' +
+              body +
+              innerDot +
+              crown +
+            '</svg>';
+          const html =
+            '<div class="tv-marker ' + (isHq ? 'is-hq' : '') + '" style="width:' + W + 'px;height:' + H + 'px;">' +
+              pulseLayer +
+              svg +
+            '</div>';
+          return L.divIcon({
+            className: '',
+            html,
+            iconSize: [W, H],
+            iconAnchor: [W / 2, H],
+            popupAnchor: [0, -H + 8],
+          });
+        }
+
+        function buildPopupContent(d) {
+          const phones = d.phones
+            .map(
+              (p) =>
+                `<div><a href="tel:${p.replace(/\s/g, '')}" style="color:#555;text-decoration:none;">${p}</a></div>`,
+            )
+            .join('');
+          const emails = d.emails
+            .map(
+              (e) =>
+                `<div><a href="mailto:${e}" style="color:#D8B569;text-decoration:none;">${e}</a></div>`,
+            )
+            .join('');
+          const website = d.websites[0]
+            ? `<div style="margin-top:8px;"><a href="${d.websites[0]}" target="_blank" rel="noopener" style="color:#D8B569;font-weight:600;text-decoration:none;">↗ Website</a></div>`
+            : '';
+          const hqBadge = d.hqLabel
+            ? `<span style="display:inline-block;background:#D8B569;color:#fff;font-size:11px;padding:2px 8px;border-radius:999px;margin-bottom:8px;">${d.hqLabel}</span>`
+            : '';
+          return `
+            <div style="min-width:220px;max-width:260px;">
+              ${hqBadge}
+              <div style="font-weight:700;color:#D8B569;font-size:15px;margin-bottom:4px;">${d.companyName}</div>
+              <div style="color:#555555;font-size:12px;margin-bottom:8px;">${d.countryName}, ${d.city}</div>
+              <div style="color:#777;font-size:12px;margin-bottom:8px;">${d.address}</div>
+              ${phones}
+              ${emails}
+              ${website}
+            </div>
+          `;
+        }
+
+        function setActiveCard(id) {
+          cards.forEach((c) => c.classList.remove('is-active'));
+          markersById.forEach((entry) => {
+            const el = entry.marker.getElement();
+            if (el) el.querySelector('.tv-marker')?.classList.remove('is-active');
+          });
+          if (id) {
+            const card = document.querySelector(`[data-distributor-id="${id}"]`);
+            card?.classList.add('is-active');
+            const entry = markersById.get(id);
+            if (entry) {
+              const el = entry.marker.getElement();
+              el?.querySelector('.tv-marker')?.classList.add('is-active');
+            }
+            activeCardId = id;
+          } else {
+            activeCardId = null;
+          }
+        }
+
+        function initMap() {
+          const mapEl = document.getElementById('distributors-map');
+          if (!mapEl || typeof L === 'undefined') return;
+
+          const map = L.map(mapEl, {
+            center: [25, 18],
+            zoom: 2,
+            minZoom: 2,
+            maxZoom: 10,
+            worldCopyJump: true,
+            zoomControl: true,
+            scrollWheelZoom: true,
+          });
+
+          L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+              attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              subdomains: 'abc',
+              maxZoom: 19,
+            },
+          ).addTo(map);
+
+          const bounds = [];
+          distributors.forEach((d) => {
+            const marker = L.marker([d.lat, d.lng], {
+              icon: buildIcon(!!d.isHq),
+              riseOnHover: true,
+            });
+            marker.bindPopup(buildPopupContent(d), {
+              maxWidth: 300,
+              className: 'tv-popup',
+            });
+            marker.on('click', () => {
+              setActiveCard(d.id);
+            });
+            marker.addTo(map);
+            markersById.set(d.id, {
+              marker,
+              region: d.region,
+              searchable: `${d.companyName} ${d.countryName} ${d.city} ${d.address} ${(d.emails || []).join(' ')}`.toLowerCase(),
+            });
+            bounds.push([d.lat, d.lng]);
+          });
+
+          if (bounds.length) {
+            const padding = window.innerWidth < 768 ? [40, 40] : [60, 80];
+            try {
+              map.fitBounds(bounds, { padding, maxZoom: 5, duration: 0.4 });
+            } catch (e) {}
+          }
+
+          cards.forEach((card) => {
+            const id = card.getAttribute('data-distributor-id');
+            card.addEventListener('mouseenter', () => {
+              const item = markersById.get(id);
+              if (!item) return;
+              const el = item.marker.getElement();
+              el?.querySelector('.tv-marker')?.classList.add('is-active');
+            });
+            card.addEventListener('mouseleave', () => {
+              if (activeCardId === id) return;
+              const item = markersById.get(id);
+              if (!item) return;
+              const el = item.marker.getElement();
+              el?.querySelector('.tv-marker')?.classList.remove('is-active');
+            });
+            card.addEventListener('click', () => {
+              const item = markersById.get(id);
+              if (!item) return;
+              setActiveCard(id);
+              map.flyTo(item.marker.getLatLng(), Math.max(map.getZoom(), 5), { duration: 0.6 });
+              item.marker.openPopup();
+            });
+          });
+
+          window.__distributorsMap = map;
+        }
+
+        function applyFilters() {
+          const searchLower = currentSearch.toLowerCase();
+          let visibleCount = 0;
+
+          cards.forEach((card) => {
+            const region = card.dataset.region;
+            const text = card.textContent.toLowerCase();
+            const regionMatch = currentRegion === 'ALL' || region === currentRegion;
+            const searchMatch = !currentSearch || text.includes(searchLower);
+            const show = regionMatch && searchMatch;
+
+            card.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+          });
+
+          const map = window.__distributorsMap;
+          markersById.forEach((entry, id) => {
+            const regionMatch = currentRegion === 'ALL' || entry.region === currentRegion;
+            const searchMatch = !currentSearch || entry.searchable.includes(searchLower);
+            const show = regionMatch && searchMatch;
+            if (show) {
+              if (map && !map.hasLayer(entry.marker)) entry.marker.addTo(map);
+            } else {
+              if (map && map.hasLayer(entry.marker)) map.removeLayer(entry.marker);
+            }
+          });
+
+          if (noResults) {
+            noResults.classList.toggle('hidden', visibleCount > 0);
+          }
+        }
+
+        filterButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            filterButtons.forEach((b) => {
+              b.classList.remove('bg-gold', 'text-white', 'border-gold');
+              b.classList.add('text-ink', 'bg-transparent');
+            });
+            btn.classList.add('bg-gold', 'text-white', 'border-gold');
+            btn.classList.remove('text-ink', 'bg-transparent');
+            currentRegion = btn.dataset.filterRegion;
+            applyFilters();
+          });
+        });
+
+        if (searchInput) {
+          let debounce;
+          searchInput.addEventListener('input', (e) => {
+            clearTimeout(debounce);
+            debounce = setTimeout(() => {
+              currentSearch = e.target.value;
+              applyFilters();
+            }, 150);
+          });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+          initMap();
+        }
+      })();
+    </script>
+  </body>
+</html>

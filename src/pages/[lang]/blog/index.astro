@@ -1,0 +1,247 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+import { POSTS_SORTED_BY_DATE, POST_CATEGORIES, getCategoryLabel, type PostCategoryKey } from '../../../data/posts';
+
+export const getStaticPaths = (() =>
+  locales.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = getTranslator(locale);
+const dict = t.dict;
+
+const heroPrompt = 'stack%20of%20old%20leather%20books%20with%20magnifying%20glass%20treasure%20map%20golden%20sunlight%20terovido%20blog%20cozy';
+const heroImage = `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${heroPrompt}&image_size=landscape_16_9`;
+
+const categories: Array<'ALL' | PostCategoryKey> = ['ALL', ...Object.keys(POST_CATEGORIES) as PostCategoryKey[]];
+const metaTitle = `${dict.nav.blogPage} — Tero Vido`;
+const metaDescription = dict.blogListPage.subtitle;
+
+const featuredPost = POSTS_SORTED_BY_DATE[0];
+const otherPosts = POSTS_SORTED_BY_DATE.slice(1);
+const displayPosts = otherPosts.slice(0, 8);
+const hasMorePosts = otherPosts.length > 9;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Header locale={locale} t={dict} />
+
+    <main>
+      <section class="snap-section snap-section-hero hero-dark py-[90px] relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+          <img
+            src={heroImage}
+            alt=""
+            class="w-full h-full object-cover"
+            width="1920"
+            height="1080"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        </div>
+        <div class="container relative z-10 snap-hero-inner min-h-[80vh] flex items-center">
+          <div class="max-w-3xl text-white" data-stagger="120">
+            <div class="section-label mb-6" data-animate="fade-up">
+              <span class="text-white/80">{dict.blogListPage.label}</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-[1.04]" data-animate="fade-up">
+              {dict.blogListPage.title}
+            </h1>
+            <p class="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl" data-animate="fade-up">
+              {dict.blogListPage.subtitle}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="snap-section py-[90px]">
+        <div class="container">
+          <div class="mb-16" data-stagger="120">
+            <div class="section-label mb-6" data-animate="fade-up">
+              <span>{dict.blogListPage.featuredPost}</span>
+            </div>
+          </div>
+
+          <article class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-20" data-animate="fade-up">
+            <div class="relative rounded-2xl overflow-hidden aspect-[16/9]">
+              <img
+                src={`https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(featuredPost.imagePrompt)}&image_size=landscape_16_9`}
+                alt={featuredPost.title[locale]}
+                class="w-full h-full object-cover"
+                width="1280"
+                height="720"
+              />
+            </div>
+            <div data-stagger="100">
+              <span class="inline-block text-sm uppercase text-ink-gray mb-4" data-animate="fade-up">
+                {getCategoryLabel(featuredPost.category, locale)}
+              </span>
+              <h2 class="text-4xl md:text-5xl font-bold text-ink mb-6 leading-[1.1]" data-animate="fade-up">
+                {featuredPost.title[locale]}
+              </h2>
+              <p class="section-text text-lg mb-6" data-animate="fade-up">
+                {featuredPost.excerpt[locale]}
+              </p>
+              <div class="flex flex-wrap items-center gap-4 mb-8 text-sm text-ink-gray" data-animate="fade-up">
+                <span>{new Date(featuredPost.dateISO).toLocaleDateString(locale === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span>·</span>
+                <span>{featuredPost.authorName}</span>
+                <span>·</span>
+                <span>{featuredPost.readingTimeMinutes} {dict.blogListPage.readingTimeLabel}</span>
+              </div>
+              <a href={`/${locale}/blog/${featuredPost.slug}/`} class="btn-primary" data-animate="fade-up">
+                {dict.blogListPage.readMore}
+              </a>
+            </div>
+          </article>
+
+          <div class="flex flex-wrap gap-2 mb-12" data-animate="fade-up">
+            {categories.map((cat, i) => {
+              const label = cat === 'ALL' ? dict.blogListPage.categoryAll : getCategoryLabel(cat, locale);
+              return (
+                <button
+                  type="button"
+                  data-filter-category={cat}
+                  class={`px-4 py-2 rounded-full border border-ink/20 text-sm font-medium transition-all duration-200 hover:border-gold hover:text-gold ${
+                    i === 0 ? 'bg-gold text-white border-gold' : 'text-ink bg-transparent'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div class="mb-8" data-animate="fade-up">
+            <h3 class="text-2xl md:text-3xl font-bold text-ink">{dict.blogListPage.latestPosts}</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blog-grid" data-stagger="120">
+            {displayPosts.map((post) => (
+              <article
+                class="group rounded-2xl overflow-hidden bg-surface shadow-sm hover:shadow-xl transition-all duration-300"
+                data-blog-card
+                data-category={post.category}
+                data-animate="fade-up"
+              >
+                <a href={`/${locale}/blog/${post.slug}/`} class="block">
+                  <div class="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={`https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(post.imagePrompt)}&image_size=landscape_4_3`}
+                      alt={post.title[locale]}
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      width="640"
+                      height="480"
+                    />
+                  </div>
+                  <div class="p-6">
+                    <span class="inline-block text-sm uppercase text-ink-gray mb-3">
+                      {getCategoryLabel(post.category, locale)}
+                    </span>
+                    <h4 class="text-xl font-bold text-gold mb-3 leading-tight group-hover:opacity-80 transition-opacity">
+                      {post.title[locale]}
+                    </h4>
+                    <p class="section-text mb-4 line-clamp-2">
+                      {post.excerpt[locale]}
+                    </p>
+                    <div class="flex items-center justify-between pt-4 border-t border-ink/10">
+                      <span class="text-sm text-ink-gray">
+                        {post.readingTimeMinutes} {dict.blogListPage.readingTimeLabel}
+                      </span>
+                      <span class="btn-ghost !p-0 !h-auto text-gold group-hover:translate-x-1 transition-transform">
+                        {dict.blogListPage.readMore} →
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              </article>
+            ))}
+          </div>
+
+          {hasMorePosts && (
+            <div class="text-center mt-16" id="show-older-wrap" data-animate="fade-up">
+              <button type="button" id="show-older-btn" class="btn-outline">
+                {dict.blogListPage.showOlder}
+              </button>
+            </div>
+          )}
+
+          <div id="blog-no-results" class="hidden text-center py-16">
+            <p class="section-text text-lg">{dict.blogListPage.noPosts}</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer locale={locale} t={dict} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+
+    <script is:inline>
+      (function() {
+        const filterButtons = document.querySelectorAll('[data-filter-category]');
+        const cards = document.querySelectorAll('[data-blog-card]');
+        const noResults = document.getElementById('blog-no-results');
+        const showOlderBtn = document.getElementById('show-older-btn');
+        const showOlderWrap = document.getElementById('show-older-wrap');
+
+        let currentCategory = 'ALL';
+
+        function applyFilters() {
+          let visibleCount = 0;
+          cards.forEach(card => {
+            const cat = card.dataset.category;
+            const show = currentCategory === 'ALL' || cat === currentCategory;
+            card.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+          });
+          if (noResults) {
+            noResults.classList.toggle('hidden', visibleCount > 0);
+          }
+        }
+
+        filterButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterButtons.forEach(b => {
+              b.classList.remove('bg-gold', 'text-white', 'border-gold');
+              b.classList.add('text-ink', 'bg-transparent');
+            });
+            btn.classList.add('bg-gold', 'text-white', 'border-gold');
+            btn.classList.remove('text-ink', 'bg-transparent');
+            currentCategory = btn.dataset.filterCategory;
+            applyFilters();
+          });
+        });
+
+        if (showOlderBtn && showOlderWrap) {
+          showOlderBtn.addEventListener('click', () => {
+            showOlderWrap.style.display = 'none';
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

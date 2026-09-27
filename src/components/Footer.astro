@@ -1,0 +1,93 @@
+---
+import type { Locale, Dictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { locale, t } = Astro.props as Props;
+
+const navLinks = [
+  { label: t.nav.products, href: `/${locale}/products/` },
+  { label: t.nav.about, href: `/${locale}/about/` },
+  { label: t.nav.distributors, href: `/${locale}/distributors/` },
+  { label: t.nav.blog, href: `/${locale}/blog/` },
+];
+---
+
+<footer id="contact" class="snap-section-footer bg-surface-muted pt-[60px] pb-10 mt-[100px]">
+  <div class="container">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 pb-12 border-b border-ink/10" data-stagger="120">
+      <div class="flex flex-col gap-3" data-animate="fade-up">
+        <a href={`/${locale}/`} class="inline-flex items-center">
+          <img
+            src="/images/mugs2u5h-mmh861d.svg"
+            alt="Tero Vido"
+            class="w-[120px] h-[68px] object-contain"
+            width="120"
+            height="68"
+          />
+        </a>
+        <p class="text-base text-ink max-w-[400px]">
+          {t.footer.tagline}
+        </p>
+        <p class="text-base text-ink">{t.footer.copyright}</p>
+      </div>
+
+      <div class="md:justify-self-center lg:justify-self-center" data-animate="fade-up">
+        <ul class="flex flex-col gap-4" data-stagger="80">
+          {navLinks.map((link) => (
+            <li data-animate="fade-up">
+              <a
+                href={link.href}
+                class="text-base text-ink hover:text-gold transition"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="flex flex-col gap-[18px] md:justify-self-end lg:justify-self-end" data-animate="fade-up">
+        <a href="#contact" class="btn-primary self-start md:self-auto lg:self-start">
+          <img
+            src="/images/mugs2u5d-w075j3r.svg"
+            alt=""
+            class="w-6 h-6"
+            width="24"
+            height="24"
+          />
+          <span>{t.nav.contact}</span>
+        </a>
+        <div class="flex items-center gap-3" data-stagger="80">
+          <img
+            src="/images/mugs2u5d-ic9jx1w.svg"
+            alt="Facebook"
+            class="w-6 h-6 transition-transform duration-300 hover:-translate-y-0.5"
+            width="24"
+            height="24"
+            data-animate="pop-in"
+          />
+          <img
+            src="/images/mugs2u5d-z8a4pg8.svg"
+            alt="YouTube"
+            class="w-7 h-5 transition-transform duration-300 hover:-translate-y-0.5"
+            width="28"
+            height="20"
+            data-animate="pop-in"
+          />
+          <img
+            src="/images/mugs2u5d-ibu5s3c.svg"
+            alt="Instagram"
+            class="w-6 h-6 transition-transform duration-300 hover:-translate-y-0.5"
+            width="24"
+            height="24"
+            data-animate="pop-in"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

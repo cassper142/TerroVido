@@ -1,0 +1,269 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+
+export const getStaticPaths = (() =>
+  locales.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = getTranslator(locale);
+const dict = t.dict;
+
+const heroPrompt = 'modern%20industrial%20office%20reception%20desk%20golden%20lamp%20terovido%20altenburg%20germany%20sunny%20window';
+const heroImage = `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${heroPrompt}&image_size=landscape_16_9`;
+
+const pageTitle = locale === 'de' ? 'Kontaktieren Sie Tero Vido' : 'Get in touch with Tero Vido';
+const pageSubtitle = locale === 'de'
+  ? 'Unser Team freut sich auf Ihre Nachricht. Ob Vertrieb, Service, Pressefragen oder Partneranfragen – wir melden uns in der Regel innerhalb eines Werktages.'
+  : 'Our team is looking forward to your message. Whether sales, service, press enquiries or partnership requests – we usually get back within one business day.';
+
+const metaTitle = `${dict.nav.contactPage} — Tero Vido`;
+const metaDescription = pageSubtitle;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Header locale={locale} t={dict} />
+
+    <main>
+      <section class="snap-section snap-section-hero hero-dark py-[90px] relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+          <img
+            src={heroImage}
+            alt=""
+            class="w-full h-full object-cover"
+            width="1920"
+            height="1080"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        </div>
+        <div class="container relative z-10 snap-hero-inner min-h-[80vh] flex items-center">
+          <div class="max-w-3xl text-white" data-stagger="120">
+            <div class="section-label mb-6" data-animate="fade-up">
+              <span class="text-white/80">{dict.nav.contactPage}</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-[1.04]" data-animate="fade-up">
+              {pageTitle}
+            </h1>
+            <p class="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl" data-animate="fade-up">
+              {pageSubtitle}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="snap-section py-[90px]">
+        <div class="container">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            <div class="space-y-6" data-stagger="120">
+              <div class="bg-surface-muted rounded-xl p-6" data-animate="fade-up">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D8B569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xl text-ink mb-1">
+                      {locale === 'de' ? 'Standort' : 'Location'}
+                    </h3>
+                    <p class="section-text text-lg mb-1">Tero Vido GmbH</p>
+                    <p class="section-text">
+                      Industriestraße 28<br />
+                      04600 Altenburg<br />
+                      {locale === 'de' ? 'Deutschland' : 'Germany'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface-muted rounded-xl p-6" data-animate="fade-up">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D8B569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xl text-ink mb-1">
+                      {locale === 'de' ? 'Telefon' : 'Phone'}
+                    </h3>
+                    <ul class="space-y-1">
+                      <li>
+                        <a href="tel:+493447123450" class="section-text hover:text-gold transition">
+                          +49 3447 123 450
+                        </a>
+                      </li>
+                      <li>
+                        <a href="tel:+493447123451" class="section-text hover:text-gold transition">
+                          +49 3447 123 451
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface-muted rounded-xl p-6" data-animate="fade-up">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D8B569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xl text-ink mb-1">
+                      {locale === 'de' ? 'E-Mail' : 'Email'}
+                    </h3>
+                    <ul class="space-y-1">
+                      <li>
+                        <a href="mailto:info@tero-vido.com" class="section-text hover:text-gold transition">
+                          info@tero-vido.com
+                        </a>
+                      </li>
+                      <li>
+                        <a href="mailto:sales@tero-vido.com" class="section-text hover:text-gold transition">
+                          sales@tero-vido.com
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface-muted rounded-xl p-6" data-animate="fade-up">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D8B569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xl text-ink mb-1">
+                      {locale === 'de' ? 'Öffnungszeiten' : 'Opening Hours'}
+                    </h3>
+                    <p class="section-text mb-1">
+                      {locale === 'de' ? 'Montag – Freitag' : 'Monday – Friday'}
+                    </p>
+                    <p class="section-text">
+                      {locale === 'de' ? '09:00 – 18:00 Uhr' : '9:00 AM – 6:00 PM'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-surface rounded-2xl shadow-sm p-8 md:p-10" data-animate="fade-up">
+              <h2 class="text-3xl font-bold text-ink mb-2">
+                {locale === 'de' ? 'Schreiben Sie uns' : 'Send us a message'}
+              </h2>
+              <p class="section-text mb-8">
+                {locale === 'de'
+                  ? 'Füllen Sie das Formular aus – wir melden uns zeitnah bei Ihnen.'
+                  : 'Fill out the form – we will get back to you shortly.'}
+              </p>
+              <form class="space-y-5" onsubmit="event.preventDefault();">
+                <div data-stagger="80">
+                  <label class="block text-sm font-semibold text-ink mb-2" data-animate="fade-up">
+                    {locale === 'de' ? 'Name' : 'Name'} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-ink/20 bg-surface focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+                    placeholder={locale === 'de' ? 'Ihr vollständiger Name' : 'Your full name'}
+                    data-animate="fade-up"
+                  />
+                </div>
+                <div data-stagger="80">
+                  <label class="block text-sm font-semibold text-ink mb-2" data-animate="fade-up">
+                    {locale === 'de' ? 'E-Mail' : 'Email'} *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-ink/20 bg-surface focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+                    placeholder={locale === 'de' ? 'name@beispiel.de' : 'name@example.com'}
+                    data-animate="fade-up"
+                  />
+                </div>
+                <div data-stagger="80">
+                  <label class="block text-sm font-semibold text-ink mb-2" data-animate="fade-up">
+                    {locale === 'de' ? 'Telefon' : 'Phone'}
+                  </label>
+                  <input
+                    type="tel"
+                    class="w-full px-4 py-3 rounded-xl border border-ink/20 bg-surface focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+                    placeholder={locale === 'de' ? '+49 ...' : '+49 ...'}
+                    data-animate="fade-up"
+                  />
+                </div>
+                <div data-stagger="80">
+                  <label class="block text-sm font-semibold text-ink mb-2" data-animate="fade-up">
+                    {locale === 'de' ? 'Betreff' : 'Subject'} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-ink/20 bg-surface focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+                    placeholder={locale === 'de' ? 'Worum geht es?' : 'What is it about?'}
+                    data-animate="fade-up"
+                  />
+                </div>
+                <div data-stagger="80">
+                  <label class="block text-sm font-semibold text-ink mb-2" data-animate="fade-up">
+                    {locale === 'de' ? 'Nachricht' : 'Message'} *
+                  </label>
+                  <textarea
+                    required
+                    rows="5"
+                    class="w-full px-4 py-3 rounded-xl border border-ink/20 bg-surface focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all resize-none"
+                    placeholder={locale === 'de' ? 'Ihre Nachricht an unser Team…' : 'Your message to our team…'}
+                    data-animate="fade-up"
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  class="btn-primary w-full md:w-auto"
+                  data-animate="pop-in"
+                >
+                  {locale === 'de' ? 'Nachricht senden' : 'Send message'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer locale={locale} t={dict} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+  </body>
+</html>

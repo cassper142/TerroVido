@@ -1,0 +1,58 @@
+---
+import Header from './Header.astro';
+import type { Locale, Dictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { locale, t } = Astro.props as Props;
+---
+
+<section
+  class="snap-section-hero hero-dark relative overflow-hidden bg-cover bg-center bg-no-repeat lg:min-h-screen flex flex-col"
+  style="background-image: url('/images/mugs2u5h-1wfowtq.svg');"
+  id="hero"
+>
+  <Header locale={locale} t={t} />
+
+  <div class="snap-hero-inner container flex-1 flex items-center pb-20 md:pb-28">
+    <div class="flex flex-col gap-4 max-w-[687px] w-full" data-stagger="110">
+      <div class="section-label" data-animate="fade-up">
+        <span>{t.hero.label}</span>
+      </div>
+
+      <h1 class="section-title" data-animate="fade-up">
+        {t.hero.title}
+      </h1>
+
+      <p class="section-text max-w-[600px]" data-animate="fade-up">
+        {t.hero.text}
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3 pt-2" data-stagger="130">
+        <a href="#products" class="btn-primary" data-animate="zoom-in">
+          <span>{t.nav.explore}</span>
+          <img
+            src="/images/mugs2u5d-77wz9xw.svg"
+            alt=""
+            class="w-[18px] h-3 shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+            width="18"
+            height="12"
+          />
+        </a>
+        <a href="#about" class="btn-secondary group" data-animate="zoom-in">
+          <img
+            src="/images/mugs2u5d-jl7axgy.svg"
+            alt=""
+            class="w-6 h-6 float-slow"
+            width="24"
+            height="24"
+          />
+          <span>{t.nav.ourStory}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

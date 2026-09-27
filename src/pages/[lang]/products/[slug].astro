@@ -1,0 +1,256 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+import { PRODUCTS_BY_SLUG, type ProductSlug } from '../../../data/products';
+
+export const getStaticPaths = (() =>
+  locales.flatMap((lang) =>
+    Object.keys(PRODUCTS_BY_SLUG).map((slug) => ({
+      params: { lang, slug },
+    })),
+  )) satisfies GetStaticPaths;
+
+const { lang, slug } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const translator = getTranslator(locale);
+const t = translator.dict;
+
+const isValidSlug = Object.keys(PRODUCTS_BY_SLUG).includes(slug as string);
+if (!isValidSlug) {
+  return Astro.redirect(`/${locale}/products/`, 302);
+}
+
+const product = PRODUCTS_BY_SLUG[slug as ProductSlug];
+
+const pageTitle = product.titles[locale];
+const pageDescription = product.shortDescriptions[locale];
+const heroBg = `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(product.heroPrompt)}&image_size=landscape_16_9`;
+
+const keyLabels = t.productDetailPage.techSpecsKeyLabels;
+const techSpecsRows: { label: string; value: string }[] = [
+  { label: keyLabels.sensor, value: product.technicalSpecs.sensor },
+  { label: keyLabels.battery, value: product.technicalSpecs.battery },
+  { label: keyLabels.batteryLife, value: product.technicalSpecs.runtime },
+  { label: keyLabels.chargeTime, value: product.technicalSpecs.charge },
+  { label: keyLabels.weight, value: product.technicalSpecs.weight },
+  { label: keyLabels.ip, value: product.technicalSpecs.ip },
+  { label: keyLabels.wireless, value: product.technicalSpecs.wlan },
+  { label: keyLabels.languages, value: product.technicalSpecs.languages[locale] },
+  { label: keyLabels.maxDepth, value: `${product.technicalSpecs.depthMaxMeters} m` },
+];
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle} — Tero Vido</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <section
+      class="snap-section-hero snap-section hero-dark relative overflow-hidden bg-cover bg-center bg-no-repeat min-h-[70vh] flex flex-col"
+      style={`background-image: url('${heroBg}');`}
+      id="hero"
+    >
+      <Header locale={locale} t={t} />
+
+      <div class="snap-hero-inner container flex-1 flex items-center pb-20 md:pb-28">
+        <div class="flex flex-col gap-4 max-w-[760px] w-full" data-stagger="110">
+          <a
+            href={`/${locale}/products/`}
+            class="inline-flex items-center gap-2 text-white/80 hover:text-white transition text-base w-fit"
+            data-animate="fade-up"
+          >
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6H2M2 6L7 1M2 6L7 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{t.productDetailPage.backToList}</span>
+          </a>
+
+          <div class="section-label pt-3" data-animate="fade-up">
+            <span>{product.label}</span>
+          </div>
+
+          <h1 class="section-title" data-animate="fade-up">
+            {product.titles[locale]}
+          </h1>
+
+          <div class="flex flex-col gap-3 max-w-[640px]" data-stagger="90">
+            <p class="section-text" data-animate="fade-up">
+              {product.shortDescriptions[locale]}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="flex flex-col gap-4 mb-12 max-w-[687px]" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{t.productsListPage.featuresTitle}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            {product.titles[locale]}
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" data-stagger="130">
+          {product.features[locale].map((feature) => (
+            <div
+              class="bg-surface-muted rounded-xl p-8 flex flex-col gap-3"
+              data-animate="fade-up"
+            >
+              <div class="section-label">
+                <span class="text-gold font-semibold uppercase text-sm">{feature.split(' ').slice(0, 2).join(' ')}</span>
+              </div>
+              <div class="flex items-start gap-3 pt-2">
+                <img
+                  src="/images/mugs2u5d-k2w37u1.svg"
+                  alt=""
+                  class="w-6 h-6 shrink-0 mt-0.5"
+                  width="24"
+                  height="24"
+                />
+                <p class="section-text">{feature}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="flex flex-col gap-4 mb-12 max-w-[687px]" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{t.productsListPage.specsTitle}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            Technical specifications
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 max-w-4xl" data-stagger="110">
+          {techSpecsRows.map((row) => (
+            <div
+              class="flex items-start justify-between gap-6 py-4 border-b border-ink/10"
+              data-animate="fade-up"
+            >
+              <span class="text-base font-medium text-ink uppercase tracking-wide">
+                {row.label}
+              </span>
+              <span class="text-base text-ink-gray text-right max-w-[55%]">
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="flex flex-col gap-4 mb-12 max-w-[687px]" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{t.productsListPage.editionsTitle}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            {t.productsListPage.editionsTitle}
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" data-stagger="130">
+          {product.editions.map((edition) => {
+            const editionTitle = edition.label;
+            return (
+              <article
+                class="flex flex-col bg-white rounded-2xl overflow-hidden border border-ink/10 shadow-sm"
+                data-animate="fade-up"
+              >
+                <div class="bg-surface-muted p-6 border-b border-ink/10">
+                  <div class="section-label">
+                    <span class="text-gold font-semibold uppercase text-sm">Edition</span>
+                  </div>
+                  <h3 class="font-bold text-ink text-[28px] leading-tight pt-2">
+                    {editionTitle}
+                  </h3>
+                </div>
+                <div class="flex flex-col gap-2 p-6 flex-1">
+                  <div class="flex items-start gap-2.5 pb-3 mb-2 border-b border-ink/10">
+                    <span class="text-sm font-semibold text-ink uppercase tracking-wide">
+                      {t.productDetailPage.includedLabel}
+                    </span>
+                  </div>
+                  <ul class="flex flex-col gap-3" data-stagger="80">
+                    {edition.included[locale].map((item) => (
+                      <li class="flex items-start gap-2.5" data-animate="fade-up">
+                        <img
+                          src="/images/mugs2u5d-k2w37u1.svg"
+                          alt=""
+                          class="w-5 h-5 shrink-0 mt-0.5"
+                          width="20"
+                          height="20"
+                        />
+                        <span class="text-sm text-ink leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="max-w-3xl mx-auto text-center flex flex-col items-center gap-6" data-stagger="110">
+          <div class="section-label self-center" data-animate="fade-up">
+            <span>{t.productDetailPage.contactForQuote}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            Interested in {product.titles[locale]}?
+          </h2>
+          <p class="section-text max-w-xl" data-animate="fade-up">
+            Get in touch with our team for a personalized quote, live demonstration and expert configuration guidance.
+          </p>
+          <div class="pt-4" data-animate="fade-up">
+            <a href={`/${locale}/contact/`} class="btn-primary">
+              <span>{t.productDetailPage.contactForQuote}</span>
+              <img
+                src="/images/mugs2u5d-77wz9xw.svg"
+                alt=""
+                class="w-[18px] h-3 shrink-0"
+                width="18"
+                height="12"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Footer locale={locale} t={t} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+  </body>
+</html>

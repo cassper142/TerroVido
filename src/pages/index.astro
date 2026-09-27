@@ -1,0 +1,86 @@
+---
+import { defaultLocale, locales, isLocale } from '../i18n/utils';
+
+const COOKIE_NAME = 'tv-locale';
+
+function readLocaleCookie(cookieHeader: string | undefined | null): string | undefined {
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${COOKIE_NAME}=`));
+  if (!match) return undefined;
+  const value = match.split('=')[1];
+  return decodeURIComponent(value || '');
+}
+
+let target = defaultLocale;
+try {
+  // @ts-ignore — headers type from Astro
+  const cookieHeader = Astro.request?.headers?.get?.('cookie');
+  const fromCookie = readLocaleCookie(cookieHeader);
+  if (isLocale(fromCookie)) target = fromCookie;
+} catch (_e) {
+  // static mode, ignore
+}
+
+const isStatic =
+  typeof import.meta.env.ASTRO_OUTPUT === 'string'
+    ? import.meta.env.ASTRO_OUTPUT === 'static'
+    : true;
+
+// In static output we render the fallback redirect page (client-side detection)
+const renderedLocale = isStatic ? defaultLocale : target;
+---
+<!doctype html>
+<html lang={renderedLocale}>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <meta name="robots" content="noindex" />
+    {locales.map((code) => (
+      <link rel="alternate" hreflang={code} href={`/${code}/`} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={`/${defaultLocale}/`} />
+    <meta http-equiv="refresh" content={`0; url=/${renderedLocale}/`} />
+  </head>
+  <body>
+    <a href={`/${renderedLocale}/`}>Continue</a>
+    <script is:inline>
+      (function () {
+        var COOKIE = 'tv-locale';
+        var LS_KEY = 'tv-locale';
+        var DEFAULT = 'en';
+        var LOCALES = ['en', 'de'];
+
+        function setCookie(value) {
+          try {
+            document.cookie =
+              COOKIE + '=' + encodeURIComponent(value) +
+              '; path=/; max-age=31536000; SameSite=Lax';
+          } catch (_) { /* noop */ }
+        }
+
+        function pick() {
+          try {
+            var fromLs = localStorage.getItem(LS_KEY);
+            if (LOCALES.indexOf(fromLs) !== -1) return fromLs;
+          } catch (_) { /* noop */ }
+          try {
+            var nav = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+            var short = String(nav).toLowerCase().slice(0, 2);
+            if (LOCALES.indexOf(short) !== -1) return short;
+          } catch (_) { /* noop */ }
+          return DEFAULT;
+        }
+
+        var chosen = pick();
+        try { localStorage.setItem(LS_KEY, chosen); } catch(_) { /* noop */ }
+        setCookie(chosen);
+        var dest = '/' + chosen + location.pathname.replace(/^\/+/, '').replace(/^(en|de)(\/|$)/, '$2') + location.search + location.hash;
+        if (!/^\/(en|de)([\/#?]|$)/.test(dest)) dest = '/' + chosen + '/';
+        location.replace(dest);
+      })();
+    </script>
+  </body>
+</html>

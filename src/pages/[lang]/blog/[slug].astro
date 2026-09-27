@@ -1,0 +1,279 @@
+---
+import type { GetStaticPaths, GetServerSideProps } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+import { POSTS, POSTS_SORTED_BY_DATE, getCategoryLabel, type Post } from '../../../data/posts';
+
+export const getStaticPaths = (() =>
+  locales.flatMap((lang) =>
+    POSTS.map((post) => ({ params: { lang, slug: post.slug } }))
+  )) satisfies GetStaticPaths;
+
+const { lang, slug } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = getTranslator(locale);
+const dict = t.dict;
+
+const post = POSTS.find((p) => p.slug === slug);
+
+if (!post) {
+  return Astro.redirect(`/${locale}/404/`);
+}
+
+const relatedPosts = POSTS_SORTED_BY_DATE
+  .filter((p) => p.slug !== post.slug)
+  .filter((p) => p.category === post.category)
+  .slice(0, 3);
+
+if (relatedPosts.length < 3) {
+  const additional = POSTS_SORTED_BY_DATE
+    .filter((p) => p.slug !== post.slug && !relatedPosts.includes(p))
+    .slice(0, 3 - relatedPosts.length);
+  relatedPosts.push(...additional);
+}
+
+const metaTitle = `${post.title[locale]} — Tero Vido`;
+const metaDescription = post.excerpt[locale];
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Header locale={locale} t={dict} />
+
+    <main>
+      <section class="snap-section-hero hero-dark relative pt-[90px]">
+        <div
+          class="h-[360px] w-full bg-cover bg-center relative"
+          style={`background-image: url('https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(post.imagePrompt)}&image_size=landscape_16_9');`}
+        >
+          <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
+          <div class="container h-full flex items-end relative z-10 pb-10">
+            <div class="text-white" data-animate="fade-up">
+              <div class="flex items-center gap-2 text-sm text-white/80 mb-4">
+                <a href={`/${locale}/blog/`} class="hover:text-white transition underline-offset-2 hover:underline">
+                  Blog
+                </a>
+                <span>/</span>
+                <span>{getCategoryLabel(post.category, locale)}</span>
+                <span>/</span>
+                <span class="text-white/90 max-w-md truncate">{post.title[locale]}</span>
+              </div>
+              <h1 class="text-3xl md:text-5xl font-bold leading-tight max-w-4xl">
+                {post.title[locale]}
+              </h1>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="snap-section py-[60px]">
+        <div class="container max-w-[900px] mx-auto">
+          <div class="flex flex-wrap items-center gap-4 mb-10 pb-8 border-b border-ink/10" data-stagger="100">
+            <div data-animate="fade-up" class="text-sm text-ink-gray">
+              <span class="font-semibold text-ink">{dict.blogPostPage.publishedLabel}:</span>{' '}
+              {new Date(post.dateISO).toLocaleDateString(locale === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
+            <div data-animate="fade-up" class="text-sm text-ink-gray">
+              <span class="font-semibold text-ink">{dict.blogPostPage.authorByLabel}:</span>{' '}
+              {post.authorName}
+            </div>
+            <div data-animate="fade-up" class="text-sm text-ink-gray">
+              <span class="font-semibold text-ink">{dict.blogPostPage.readingTimeLabel}:</span>{' '}
+              {post.readingTimeMinutes}
+            </div>
+          </div>
+
+          <div class="mb-12" data-animate="fade-up">
+            <div class="inline-flex flex-wrap gap-2">
+              {post.tags[locale].map((tag) => (
+                <span class="px-3 py-1 bg-surface-muted text-ink-gray text-xs rounded-full border border-ink/10">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <article class="prose-content space-y-2">
+            {post.contentBlocks.map((block, i) => {
+              const animDelay = i < 6 ? String(i + 1) : undefined;
+              if (block.type === 'heading') {
+                return (
+                  <h2
+                    class="text-gold text-[32px] mt-10 mb-4 font-bold leading-tight"
+                    data-animate="fade-up"
+                    data-delay={animDelay}
+                  >
+                    {block.text[locale]}
+                  </h2>
+                );
+              }
+              if (block.type === 'paragraph') {
+                return (
+                  <p
+                    class="section-text leading-relaxed my-4 text-lg"
+                    data-animate="fade-up"
+                    data-delay={animDelay}
+                  >
+                    {block.text[locale]}
+                  </p>
+                );
+              }
+              if (block.type === 'quote') {
+                return (
+                  <blockquote
+                    class="border-l-4 border-gold bg-surface-muted p-6 italic text-ink my-8 rounded-r-xl text-lg"
+                    data-animate="fade-up"
+                    data-delay={animDelay}
+                  >
+                    {block.text[locale]}
+                  </blockquote>
+                );
+              }
+              if (block.type === 'list' && block.items) {
+                return (
+                  <div data-animate="fade-up" data-delay={animDelay}>
+                    {block.text[locale] && (
+                      <p class="section-text leading-relaxed mb-3 text-lg">{block.text[locale]}</p>
+                    )}
+                    <ul class="list-disc space-y-2 ml-6 section-text text-lg">
+                      {block.items[locale].map((item, j) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </article>
+        </div>
+      </section>
+
+      {relatedPosts.length > 0 && (
+        <section class="snap-section py-[90px]">
+          <div class="container">
+            <div class="mb-12" data-stagger="120">
+              <div class="section-label mb-6" data-animate="fade-up">
+                <span>{dict.blogPostPage.relatedPostsLabel}</span>
+              </div>
+              <h2 class="section-title" data-animate="fade-up">{dict.blogPostPage.relatedPostsLabel}</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-stagger="120">
+              {relatedPosts.map((rp) => (
+                <a
+                  href={`/${locale}/blog/${rp.slug}/`}
+                  class="group rounded-2xl overflow-hidden bg-surface shadow-sm hover:shadow-xl transition-all duration-300"
+                  data-animate="fade-up"
+                >
+                  <div class="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={`https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent(rp.imagePrompt)}&image_size=landscape_4_3`}
+                      alt={rp.title[locale]}
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      width="640"
+                      height="480"
+                    />
+                  </div>
+                  <div class="p-6">
+                    <span class="inline-block text-sm uppercase text-ink-gray mb-3">
+                      {getCategoryLabel(rp.category, locale)}
+                    </span>
+                    <h3 class="text-xl font-bold text-gold mb-3 leading-tight group-hover:opacity-80 transition-opacity">
+                      {rp.title[locale]}
+                    </h3>
+                    <p class="section-text mb-4 line-clamp-2">
+                      {rp.excerpt[locale]}
+                    </p>
+                    <div class="flex items-center justify-between pt-4 border-t border-ink/10">
+                      <span class="text-sm text-ink-gray">
+                        {rp.readingTimeMinutes} {dict.blogListPage.readingTimeLabel}
+                      </span>
+                      <span class="text-gold group-hover:translate-x-1 transition-transform text-sm font-medium">
+                        {dict.blogListPage.readMore} →
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section class="snap-section py-[90px]">
+        <div class="container max-w-[900px] mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10 p-8 md:p-12 bg-surface-muted rounded-3xl" data-stagger="120">
+            <div data-animate="fade-up">
+              <h3 class="text-3xl font-bold text-ink mb-4">{dict.blogPostPage.shareLabel}</h3>
+              <p class="section-text mb-6">
+                {locale === 'de'
+                  ? 'Teilen Sie diesen Artikel mit Kollegen und Freunden, die an Bodendetektion und Archäologie interessiert sind.'
+                  : 'Share this article with colleagues and friends interested in ground detection and archaeology.'}
+              </p>
+              <div class="flex gap-3">
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.url.toString())}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-outline"
+                >
+                  Facebook
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.url.toString())}&text=${encodeURIComponent(post.title[locale])}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-outline"
+                >
+                  X / Twitter
+                </a>
+                <a
+                  href={`mailto:?subject=${encodeURIComponent(post.title[locale])}&body=${encodeURIComponent(Astro.url.toString())}`}
+                  class="btn-outline"
+                >
+                  Email
+                </a>
+              </div>
+            </div>
+            <div data-animate="fade-up">
+              <h3 class="text-3xl font-bold text-ink mb-4">{dict.blogPostPage.subscribeLabel}</h3>
+              <p class="section-text mb-6">
+                {locale === 'de'
+                  ? 'Abonnieren Sie unsere Updates und verpassen Sie keine neuen Feldnotizen, Produktneuheiten oder Veranstaltungen.'
+                  : 'Subscribe to our updates and never miss new field notes, product launches, or events.'}
+              </p>
+              <button type="button" class="btn-primary w-full md:w-auto">
+                {dict.blogPostPage.subscribeLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer locale={locale} t={dict} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+  </body>
+</html>

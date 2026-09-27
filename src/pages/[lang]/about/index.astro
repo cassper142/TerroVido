@@ -1,0 +1,333 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  defaultLocale,
+  getTranslator,
+  isLocale,
+} from '../../../i18n/utils';
+
+export const getStaticPaths = (() =>
+  locales.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const translator = getTranslator(locale);
+const t = translator.dict;
+
+const about = t.aboutPage;
+
+const pageTitle = about.title;
+const pageDescription = about.subtitle;
+const heroBg =
+  'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=terovido%20factory%20germany%20engineers%20team%20working%20on%203D%20ground%20radar%20modern%20lab%20sunny&image_size=landscape_16_9';
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle} — Tero Vido</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <section
+      class="snap-section-hero snap-section hero-dark relative overflow-hidden bg-cover bg-center bg-no-repeat min-h-[70vh] flex flex-col"
+      style={`background-image: url('${heroBg}');`}
+      id="hero"
+    >
+      <Header locale={locale} t={t} />
+
+      <div class="snap-hero-inner container flex-1 flex items-center pb-20 md:pb-28">
+        <div class="flex flex-col gap-4 max-w-[687px] w-full" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{about.label}</span>
+          </div>
+
+          <h1 class="section-title" data-animate="fade-up">
+            {about.title}
+          </h1>
+
+          <p class="section-text max-w-[600px]" data-animate="fade-up">
+            {about.subtitle}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start" data-stagger="130">
+          <div class="flex flex-col gap-4" data-animate="fade-up">
+            <div class="section-label">
+              <span>{about.whoWeAreTitle}</span>
+            </div>
+            <h2 class="section-title text-4xl md:text-5xl">
+              {about.whoWeAreTitle}
+            </h2>
+            <p class="section-text max-w-[560px] pt-2">
+              {about.whoWeAreText}
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-4" data-animate="fade-up">
+            <div class="section-label">
+              <span>{about.whatWeDoTitle}</span>
+            </div>
+            <h2 class="section-title text-4xl md:text-5xl">
+              {about.whatWeDoTitle}
+            </h2>
+            <ul class="flex flex-col gap-4 pt-2" data-stagger="110">
+              {about.whatWeDoItems.map((item) => (
+                <li class="flex items-start gap-3" data-animate="fade-up">
+                  <img
+                    src="/images/mugs2u5d-k2w37u1.svg"
+                    alt=""
+                    class="w-6 h-6 shrink-0 mt-0.5"
+                    width="24"
+                    height="24"
+                  />
+                  <span class="text-base text-ink leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8" data-stagger="130">
+          <div
+            class="bg-surface-muted rounded-xl p-8 flex flex-col gap-4"
+            data-animate="fade-up"
+          >
+            <div class="section-label">
+              <span class="text-gold font-semibold uppercase text-sm">{about.ourPassionTitle}</span>
+            </div>
+            <h3 class="font-bold text-ink text-[28px] leading-tight pt-1">
+              {about.ourPassionTitle}
+            </h3>
+            <p class="section-text pt-1">
+              {about.ourPassionText}
+            </p>
+          </div>
+
+          <div
+            class="bg-surface-muted rounded-xl p-8 flex flex-col gap-4"
+            data-animate="fade-up"
+          >
+            <div class="section-label">
+              <span class="text-gold font-semibold uppercase text-sm">{about.ourGoalTitle}</span>
+            </div>
+            <h3 class="font-bold text-ink text-[28px] leading-tight pt-1">
+              {about.ourGoalTitle}
+            </h3>
+            <p class="section-text pt-1">
+              {about.ourGoalText}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="flex flex-col gap-4 mb-12 max-w-[687px]" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{about.valuesTitle}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            {about.valuesTitle}
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8" data-stagger="130">
+          {about.values.map((value) => (
+            <div
+              class="bg-white rounded-2xl p-8 flex flex-col gap-4 border border-ink/10 shadow-sm hover:-translate-y-1 transition-all duration-300"
+              data-animate="fade-up"
+            >
+              <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+                <img
+                  src="/images/mugs2u5d-r7kzdcm.svg"
+                  alt=""
+                  class="w-6 h-6"
+                  width="24"
+                  height="24"
+                />
+              </div>
+              <div class="section-label">
+                <span class="text-gold font-semibold uppercase text-sm">{value.iconKey}</span>
+              </div>
+              <h3 class="font-bold text-ink text-2xl leading-tight">
+                {value.title}
+              </h3>
+              <p class="section-text pt-1">
+                {value.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="flex flex-col gap-4 mb-16 max-w-[687px]" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{about.timelineTitle}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            {about.timelineTitle}
+          </h2>
+        </div>
+
+        <div class="relative max-w-4xl mx-auto" data-stagger="150">
+          <div class="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gold/40 -translate-x-1/2"></div>
+
+          <div class="flex flex-col gap-12">
+            {about.timeline.map((item, idx) => {
+              const isLeft = idx % 2 === 0;
+              return (
+                <div
+                  class={`relative flex ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} items-start gap-6 md:gap-12`}
+                  data-animate="fade-up"
+                >
+                  <div class="absolute left-6 md:left-1/2 w-4 h-4 rounded-full bg-gold border-4 border-surface shadow-[0_0_0_3px_rgba(216,181,105,0.25)] -translate-x-1/2 mt-2"></div>
+
+                  <div class={`pl-16 md:pl-0 md:w-1/2 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
+                    <div class="bg-surface-muted rounded-xl p-6 md:p-8">
+                      <div class="font-bold text-gold text-4xl leading-none mb-3">
+                        {item.year}
+                      </div>
+                      <h3 class="font-bold text-ink text-xl leading-tight mb-2">
+                        {item.title}
+                      </h3>
+                      <p class="section-text">
+                        {item.text}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="hidden md:block md:w-1/2"></div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="flex flex-col gap-4 mb-12 max-w-[687px]" data-stagger="110">
+          <div class="section-label" data-animate="fade-up">
+            <span>{about.storyTitle}</span>
+          </div>
+          <h2 class="section-title text-4xl md:text-5xl" data-animate="fade-up">
+            {about.storyTitle}
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16" data-stagger="130">
+          {about.storyParagraphs.map((paragraph) => (
+            <p class="section-text text-lg leading-relaxed" data-animate="fade-up">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="snap-section relative bg-surface py-[100px]">
+      <div class="container">
+        <div class="max-w-4xl mx-auto" data-animate="fade-up">
+          <div class="bg-surface-muted rounded-2xl p-8 md:p-12 flex flex-col lg:flex-row gap-10 lg:gap-16">
+            <div class="flex flex-col gap-6 lg:w-1/2">
+              <div class="section-label">
+                <span>{about.contactLabel}</span>
+              </div>
+              <h2 class="section-title text-4xl md:text-5xl">
+                {about.contactLabel}
+              </h2>
+
+              <div class="flex flex-col gap-6 pt-2">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                    <img
+                      src="/images/mugs2u5d-w075j3r.svg"
+                      alt=""
+                      class="w-6 h-6"
+                      width="24"
+                      height="24"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-semibold text-ink-gray uppercase tracking-wide">
+                      {about.addressTitle}
+                    </span>
+                    <span class="text-base text-ink">{about.location}</span>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                    <img
+                      src="/images/mugs2u5d-k2w37u1.svg"
+                      alt=""
+                      class="w-6 h-6"
+                      width="24"
+                      height="24"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-semibold text-ink-gray uppercase tracking-wide">
+                      {about.hoursTitle}
+                    </span>
+                    <span class="text-base text-ink">{about.hours}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-6">
+                <a href={`/${locale}/contact/`} class="btn-primary">
+                  <img
+                    src="/images/mugs2u5d-yuzchse.svg"
+                    alt=""
+                    class="w-6 h-6"
+                    width="24"
+                    height="24"
+                  />
+                  <span>{about.contactLabel}</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="lg:w-1/2 flex items-center justify-center">
+              <div class="rounded-2xl overflow-hidden w-full h-full min-h-[320px] bg-cover bg-center"
+                style={`background-image: url('${heroBg}');`}
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Footer locale={locale} t={t} />
+
+    <script is:inline src="/scripts/scroll-animate.js"></script>
+    <script is:inline src="/scripts/header-scroll.js"></script>
+  </body>
+</html>

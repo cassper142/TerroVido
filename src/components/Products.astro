@@ -1,0 +1,59 @@
+---
+import type { Locale, Dictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { t } = Astro.props as Props;
+
+const productImages = [
+  '/images/mugs2u5h-pectg26.svg',
+  '/images/mugs2u5h-iw5a56q.svg',
+] as const;
+
+const products = t.products.items.map((p, i) => ({
+  ...p,
+  image: productImages[i],
+}));
+---
+
+<section id="products" class="snap-section relative bg-surface py-[100px]">
+  <div class="container">
+    <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 lg:gap-8 mb-[98px]">
+      <div class="flex flex-col gap-4 max-w-[687px] w-full" data-stagger="110">
+        <div class="section-label" data-animate="fade-up">
+          <span>{t.products.label}</span>
+        </div>
+        <h2 class="section-title" data-animate="fade-up">
+          {t.products.title}
+        </h2>
+      </div>
+      <p class="section-text max-w-[407px] lg:pb-2" data-animate="fade-up">
+        {t.products.subtitle}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-6 items-stretch" data-stagger="150">
+      {products.map((product) => (
+        <article class="flex flex-col gap-[25px]" data-animate="fade-up">
+          <div class="overflow-hidden rounded-[10px]">
+            <img
+              src={product.image}
+              alt={product.title}
+              class="w-full h-[320px] md:h-[428px] object-cover transition-transform duration-[1200ms] hover:scale-[1.04]"
+              loading="lazy"
+            />
+          </div>
+          <div class="flex flex-col gap-3">
+            <h3 class="font-bold text-gold text-[28px] leading-[37px] md:text-[36px]">
+              {product.title}
+            </h3>
+            <p class="section-text max-w-[539px]">{product.description}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

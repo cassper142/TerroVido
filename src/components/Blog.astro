@@ -1,0 +1,67 @@
+---
+import type { Locale, Dictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { t } = Astro.props as Props;
+
+const postImages = [
+  '/images/mugs2u5h-tdijsbj.svg',
+  '/images/mugs2u5h-mbvuwlg.svg',
+  '/images/mugs2u5h-7k5ffhi.svg',
+] as const;
+
+const posts = t.blog.items.map((p, i) => ({
+  ...p,
+  image: postImages[i],
+}));
+---
+
+<section id="blog" class="snap-section py-[100px] bg-surface">
+  <div class="container">
+    <div class="flex flex-col gap-4 max-w-[500px] mb-[60px]" data-stagger="110">
+      <div class="section-label" data-animate="fade-up">
+        <span>{t.blog.label}</span>
+      </div>
+      <h2 class="section-title" data-animate="fade-up">
+        {t.blog.title}
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-stagger="140">
+      {posts.map((p) => (
+        <article class="flex flex-col gap-3 bg-surface-muted rounded-[10px] p-5 transition-all duration-300 hover:shadow-card hover:-translate-y-1" data-animate="fade-up">
+          <div class="overflow-hidden rounded-[10px]">
+            <img
+              src={p.image}
+              alt={p.title}
+              class="w-full h-[183px] object-cover transition-transform duration-[1200ms] hover:scale-[1.06]"
+              loading="lazy"
+              width="312"
+              height="183"
+            />
+          </div>
+          <p class="section-text text-sm">
+            {p.tag} · {p.date}
+          </p>
+          <h3 class="font-bold text-gold text-xl md:text-[24px] leading-[25px]">
+            {p.title}
+          </h3>
+          <a href="#" class="btn-ghost self-start -ml-4 mt-1 group">
+            <span>{t.nav.readStory}</span>
+            <img
+              src="/images/mugs2u5d-k2w37u1.svg"
+              alt=""
+              class="w-[18px] h-3 shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+              width="18"
+              height="12"
+            />
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

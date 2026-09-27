@@ -1,0 +1,265 @@
+---
+import type { Locale, Dictionary } from '../i18n/utils';
+import { DISTRIBUTORS } from '../data/distributors';
+
+interface Props {
+  locale: Locale;
+  t: Dictionary;
+}
+
+const { t, locale } = Astro.props as Props;
+
+const distributorsJson = JSON.stringify(
+  DISTRIBUTORS.map((d) => ({
+    id: d.id,
+    companyName: d.companyName,
+    countryName: d.countryName[locale],
+    city: d.city[locale],
+    address: d.address,
+    phones: d.phones,
+    emails: d.emails,
+    websites: d.websites,
+    lat: d.lat,
+    lng: d.lng,
+    region: d.region,
+    isHq: !!d.isHq,
+    hqLabel: d.hqLabel?.[locale],
+  })),
+);
+
+const distributorsUrl = `/${locale}/distributors/`;
+---
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<style is:global>
+  #home-network-map .leaflet-container {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #F2F2F2;
+    border-radius: 10px;
+  }
+  #home-network-map .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(85, 85, 85, 0.12);
+    padding: 4px;
+  }
+  #home-network-map .leaflet-popup-content {
+    margin: 14px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  #home-network-map .leaflet-popup-tip {
+    box-shadow: none;
+  }
+  #home-network-map .leaflet-control-attribution {
+    background: rgba(255,255,255,0.7) !important;
+    backdrop-filter: blur(4px);
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+    border-radius: 4px 0 0 0;
+  }
+  #home-network-map .leaflet-control-zoom {
+    display: none;
+  }
+  #home-network-map .leaflet-div-icon {
+    background: transparent;
+    border: none;
+  }
+  #home-network-map .tv-marker {
+    position: relative;
+    transform-origin: bottom center;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease;
+    filter: drop-shadow(0 4px 8px rgba(85, 85, 85, 0.22));
+  }
+  #home-network-map .tv-marker:hover,
+  #home-network-map .tv-marker.is-active {
+    transform: translateY(-2px) scale(1.08);
+    filter: drop-shadow(0 8px 14px rgba(216, 181, 105, 0.45));
+  }
+  #home-network-map .tv-marker.is-hq .tv-pin-pulse {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    border-radius: 9999px;
+    background: rgba(216, 181, 105, 0.55);
+    pointer-events: none;
+    animation: tvHomePinPulse 2.4s ease-out infinite;
+  }
+  @keyframes tvHomePinPulse {
+    0%   { transform: scale(0.6); opacity: 0.7; }
+    80%  { transform: scale(2.6); opacity: 0; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+</style>
+
+<section id="network" class="snap-section bg-surface-muted py-[100px]">
+  <div class="container">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[90px] items-center">
+      <div class="flex flex-col gap-4" data-stagger="110">
+        <div class="section-label" data-animate="fade-up">
+          <span>{t.network.label}</span>
+        </div>
+
+        <h2 class="section-title" data-animate="fade-up">{t.network.title}</h2>
+
+        <p class="section-text max-w-[539px]" data-animate="fade-up">
+          {t.network.text}
+        </p>
+
+        <div class="pt-2" data-animate="zoom-in">
+          <a href={distributorsUrl} class="btn-outline group">
+            <span>{t.nav.findPartner}</span>
+            <img
+              src="/images/mugs2u5d-k2w37u1.svg"
+              alt=""
+              class="w-[18px] h-3 shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+              width="18"
+              height="12"
+            />
+          </a>
+        </div>
+      </div>
+
+      <div id="home-network-map" class="overflow-hidden rounded-[10px] shadow-sm border border-ink/5 bg-surface-muted" data-animate="fade-right">
+        <div id="home-network-map-inner" style="height: 380px; width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script
+  is:inline
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script is:inline define:vars={{ distributorsJson }}>
+  (function () {
+    const distributors = JSON.parse(distributorsJson);
+
+    function buildIcon(isHq) {
+      const W = isHq ? 34 : 27;
+      const H = isHq ? 42 : 34;
+      const PIN_STROKE = '#ffffff';
+      const STROKE_W = 2.2;
+      const body = isHq
+        ? '<path d="M17 1 C8 1 0.5 7.8 0.5 16.7 C0.5 25.8 17 41 17 41 C17 41 33.5 25.8 33.5 16.7 C33.5 7.8 26 1 17 1 Z" fill="#555555" stroke="' + PIN_STROKE + '" stroke-width="' + STROKE_W + '"/>'
+        : '<path d="M13.5 1 C6 1 0.5 6.5 0.5 14 C0.5 21.5 13.5 33 13.5 33 C13.5 33 26.5 21.5 26.5 14 C26.5 6.5 21 1 13.5 1 Z" fill="#D8B569" stroke="' + PIN_STROKE + '" stroke-width="' + STROKE_W + '"/>';
+      const innerDot = isHq
+        ? '<circle cx="17" cy="16" r="6" fill="#D8B569"/>'
+        : '<circle cx="13.5" cy="13.5" r="4.6" fill="#ffffff"/>';
+      const crown = isHq
+        ? '<path d="M10 11.5 L12.5 7.5 L15 11 L17 6.5 L19 11 L21.5 7.5 L24 11.5 L24 14.8 L10 14.8 Z" fill="#D8B569" stroke="#ffffff" stroke-width="0.9"/>'
+        : '';
+      const pulseLayer = isHq ? '<span class="tv-pin-pulse"></span>' : '';
+      const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="display:block;">' +
+          body +
+          innerDot +
+          crown +
+        '</svg>';
+      const html =
+        '<div class="tv-marker ' + (isHq ? 'is-hq' : '') + '" style="width:' + W + 'px;height:' + H + 'px;">' +
+          pulseLayer +
+          svg +
+        '</div>';
+      return L.divIcon({
+        className: '',
+        html,
+        iconSize: [W, H],
+        iconAnchor: [W / 2, H],
+        popupAnchor: [0, -H + 6],
+      });
+    }
+
+    function buildPopupContent(d) {
+      const phones = (d.phones || [])
+        .map((p) => `<div><a href="tel:${p.replace(/\s/g, '')}" style="color:#555;text-decoration:none;">${p}</a></div>`)
+        .join('');
+      const emails = (d.emails || [])
+        .map((e) => `<div><a href="mailto:${e}" style="color:#D8B569;text-decoration:none;">${e}</a></div>`)
+        .join('');
+      const website = (d.websites && d.websites[0])
+        ? `<div style="margin-top:6px;"><a href="${d.websites[0]}" target="_blank" rel="noopener" style="color:#D8B569;font-weight:600;text-decoration:none;">↗ Website</a></div>`
+        : '';
+      const hqBadge = d.hqLabel
+        ? `<span style="display:inline-block;background:#D8B569;color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;margin-bottom:6px;">${d.hqLabel}</span>`
+        : '';
+      return `
+        <div style="min-width:200px;max-width:240px;">
+          ${hqBadge}
+          <div style="font-weight:700;color:#D8B569;font-size:14px;margin-bottom:3px;">${d.companyName}</div>
+          <div style="color:#555555;font-size:11px;margin-bottom:6px;">${d.countryName}, ${d.city}</div>
+          ${phones}
+          ${emails}
+          ${website}
+        </div>
+      `;
+    }
+
+    function initMap() {
+      const el = document.getElementById('home-network-map-inner');
+      if (!el || typeof L === 'undefined') return;
+      if (el.dataset.init === '1') return;
+      el.dataset.init = '1';
+
+      const map = L.map(el, {
+        center: [28, 18],
+        zoom: 2,
+        minZoom: 2,
+        maxZoom: 8,
+        worldCopyJump: true,
+        zoomControl: false,
+        scrollWheelZoom: false,
+        dragging: true,
+        doubleClickZoom: false,
+        touchZoom: false,
+        boxZoom: false,
+        keyboard: false,
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abc',
+        maxZoom: 19,
+      }).addTo(map);
+
+      const bounds = [];
+      distributors.forEach((d) => {
+        const marker = L.marker([d.lat, d.lng], {
+          icon: buildIcon(!!d.isHq),
+          riseOnHover: true,
+        });
+        marker.bindPopup(buildPopupContent(d), { maxWidth: 260 });
+        marker.addTo(map);
+        bounds.push([d.lat, d.lng]);
+      });
+
+      if (bounds.length) {
+        const pad = window.innerWidth < 768 ? [20, 20] : [30, 40];
+        try {
+          map.fitBounds(bounds, { padding: pad, maxZoom: 5, duration: 0.5 });
+        } catch (e) {}
+      }
+
+      const container = L.DomUtil.get('home-network-map-inner');
+      if (container != null) {
+        container._leaflet_id = null;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+      initMap();
+    }
+  })();
+</script>

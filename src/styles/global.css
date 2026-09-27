@@ -1,0 +1,484 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y proximity;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-top: 120px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(216, 181, 105, 0.5) transparent;
+  }
+  html::-webkit-scrollbar {
+    width: 10px;
+  }
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  html::-webkit-scrollbar-thumb {
+    background: rgba(216, 181, 105, 0.4);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  html::-webkit-scrollbar-thumb:hover {
+    background: rgba(216, 181, 105, 0.7);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+  }
+  body {
+    @apply font-sans text-ink antialiased bg-surface;
+    height: 100%;
+  }
+  .snap-section,
+  .snap-section-hero {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+    position: relative;
+    width: 100%;
+    scroll-margin-top: 120px;
+  }
+  .snap-section:not(.snap-section-hero):not(.snap-section-footer)::before {
+    content: '';
+    display: block;
+    height: 120px;
+    visibility: hidden;
+    pointer-events: none;
+    margin-top: -120px;
+  }
+  .snap-section-footer {
+    scroll-margin-top: 0;
+  }
+  .snap-section-hero {
+    scroll-margin-top: 0;
+  }
+  .snap-section-hero .snap-hero-inner {
+    padding-top: 120px;
+  }
+  @media (min-width: 1024px) {
+    html {
+      scroll-snap-type: y mandatory;
+      scroll-padding-top: 84px;
+    }
+    .snap-section,
+    .snap-section-hero {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      scroll-margin-top: 84px;
+    }
+    .snap-section:not(.snap-section-hero):not(.snap-section-footer)::before {
+      height: 84px;
+      margin-top: -84px;
+    }
+    .snap-section-hero {
+      justify-content: stretch;
+      padding-top: 0;
+    }
+    .snap-section-hero .snap-hero-inner {
+      padding-top: 84px;
+    }
+    .snap-section-footer {
+      scroll-snap-align: end;
+      scroll-snap-stop: always;
+      min-height: auto;
+      display: block;
+      padding-top: 0;
+      scroll-margin-top: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    [data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+    }
+    html {
+      scroll-snap-type: none !important;
+    }
+  }
+}
+
+@layer components {
+  .section-label {
+    @apply inline-flex items-center gap-3.5;
+  }
+  .section-label::before {
+    content: '';
+    @apply w-[55px] h-px bg-gold;
+  }
+  .section-label span {
+    @apply text-base text-ink-gray uppercase;
+  }
+
+  .section-title {
+    @apply font-bold text-ink text-5xl leading-[1.04] md:text-[76px] md:leading-[79px];
+  }
+
+  .section-text {
+    @apply text-base text-ink-gray leading-relaxed;
+  }
+
+  /* ========== Hero with photo background — dark overlay + light text ========== */
+  .snap-section-hero.hero-dark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(10, 10, 15, 0.68) 0%,
+      rgba(10, 10, 15, 0.46) 48%,
+      rgba(10, 10, 15, 0.18) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+  .snap-section-hero.hero-dark > .header-root,
+  .snap-section-hero.hero-dark > .snap-hero-inner,
+  .snap-section-hero.hero-dark > div > .header-root,
+  .snap-section-hero.hero-dark > div > .snap-hero-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .snap-section-hero.hero-dark .section-label::before {
+    background: rgba(255, 255, 255, 0.7);
+  }
+  .snap-section-hero.hero-dark .section-label span {
+    color: rgba(255, 255, 255, 0.86);
+  }
+  .snap-section-hero.hero-dark .section-title {
+    color: #ffffff;
+  }
+  .snap-section-hero.hero-dark .section-text {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  /* Header внутри Hero (transparent) — светлые ссылки на тёмном фоне */
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) nav a,
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) nav ul li a {
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) nav a:hover,
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) nav ul li a:hover {
+    color: #D8B569;
+  }
+  /* Соц иконки — НЕ ИНВЕРТИРУЕМ цвет, оставляем оригинал SVG */
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) .social-group img {
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.45));
+  }
+  /* Логотип делаем более ярким */
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) a img[alt="Tero Vido"] {
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+  }
+  /* Language pill внутри Hero */
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) [role="group"][aria-label="Language switcher"] {
+    border-color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+  }
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) [role="group"][aria-label="Language switcher"] a:not(.bg-gold) {
+    color: rgba(255,255,255,0.9);
+  }
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) [role="group"][aria-label="Language switcher"] a:not(.bg-gold):hover {
+    color: #D8B569;
+  }
+  /* Мобильное меню кнопка */
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) #menuToggle {
+    border-color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.08);
+  }
+  .snap-section-hero.hero-dark > .header-root:not(.header--scrolled) #menuToggle svg path {
+    stroke: #ffffff;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-gold px-4 py-2.5 h-11 text-white text-base transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(216,181,105,0.35)];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 h-11 text-ink text-base transition-all duration-300 hover:bg-surface-muted hover:-translate-y-0.5;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border border-gold px-[15px] py-[9px] h-11 text-ink text-base transition-all duration-300 hover:bg-gold/10 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(216,181,105,0.25)];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 h-11 text-ink-gray text-base transition-all duration-300 hover:text-ink hover:-translate-y-0.5;
+  }
+  .snap-nav {
+    position: fixed;
+    top: 50%;
+    right: 32px;
+    transform: translateY(-50%);
+    z-index: 60;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  @media (min-width: 768px) {
+    .snap-nav {
+      display: flex;
+    }
+  }
+  .snap-nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(31, 51, 108, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 0;
+  }
+  .snap-nav-btn:hover {
+    background: #D8B569;
+    color: #ffffff;
+    transform: translateY(-1px);
+    border-color: transparent;
+  }
+  .snap-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    background: rgba(255, 255, 255, 0.6);
+  }
+  .snap-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 6px;
+    margin: 4px 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 9999px;
+    box-shadow: 0 8px 24px rgba(31, 51, 108, 0.08);
+  }
+  .snap-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 0;
+  }
+  .snap-dot:hover {
+    background: rgba(216, 181, 105, 0.65);
+    transform: scale(1.15);
+  }
+  .snap-dot.is-active {
+    background: #D8B569;
+    transform: scale(1.35);
+    box-shadow: 0 0 0 3px rgba(216, 181, 105, 0.25);
+  }
+}
+
+@layer utilities {
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeDown {
+    from {
+      opacity: 0;
+      transform: translateY(-22px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fadeLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes fadeRight {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes zoomIn {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes popIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    60% {
+      transform: scale(1.08);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes floatSlow {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  [data-animate] {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  [data-animate].is-visible {
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-animate='fade-up'].is-visible {
+    animation-name: fadeUp;
+    animation-duration: 0.85s;
+  }
+  [data-animate='fade-down'].is-visible {
+    animation-name: fadeDown;
+    animation-duration: 0.8s;
+  }
+  [data-animate='fade-in'].is-visible {
+    animation-name: fadeIn;
+    animation-duration: 0.9s;
+  }
+  [data-animate='fade-left'].is-visible {
+    animation-name: fadeLeft;
+    animation-duration: 0.9s;
+  }
+  [data-animate='fade-right'].is-visible {
+    animation-name: fadeRight;
+    animation-duration: 0.9s;
+  }
+  [data-animate='zoom-in'].is-visible {
+    animation-name: zoomIn;
+    animation-duration: 0.85s;
+  }
+  [data-animate='pop-in'].is-visible {
+    animation-name: popIn;
+    animation-duration: 0.75s;
+  }
+  [data-animate='draw'].is-visible * {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: drawStroke 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes drawStroke {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  [data-animate='draw'] svg,
+  [data-animate='draw'] img {
+    animation: zoomIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  [data-delay='1'] {
+    animation-delay: 80ms;
+  }
+  [data-delay='2'] {
+    animation-delay: 160ms;
+  }
+  [data-delay='3'] {
+    animation-delay: 240ms;
+  }
+  [data-delay='4'] {
+    animation-delay: 320ms;
+  }
+  [data-delay='5'] {
+    animation-delay: 400ms;
+  }
+  [data-delay='6'] {
+    animation-delay: 480ms;
+  }
+
+  .float-slow {
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+}
+
+/* Header transparent-on-top — outside layers to win cascade */
+.header-root {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+}
+.header-root.header--scrolled {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 10px 30px rgba(31, 51, 108, 0.08) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .header-root {
+    transition: none !important;
+  }
+}
